@@ -35,3 +35,11 @@ class Utils {
     return configPath.join(name);
   }
 }
+
+extension FormatTime on Duration {
+  String formatTimeLable() {
+    final mins = inMinutes.toString().padLeft(2, '0');
+    final secs = (inSeconds % 60).toString().padLeft(2, '0');
+    return '$mins:$secs';
+  }
+}

@@ -3,7 +3,6 @@
 import 'dart:io';
 
 import 'package:dart_core_extensions/dart_core_extensions.dart';
-import 'package:flutter_taglib/flutter_taglib.dart';
 import 'package:mime/mime.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/models/audio_meta.dart';

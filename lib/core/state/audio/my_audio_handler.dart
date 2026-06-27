@@ -5,8 +5,9 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   final _player = AudioPlayer();
 
   MyAudioHandler() {
+
     // Player ရဲ့ State ပြောင်းလဲမှုတွေကို Notification ဘက်ဆီ လှမ်းတွန်းပေးဖို့ နားထောင်ထားမယ်
-    // _player.playbackEventStream.map(_transformEvent).pipe(playbackState);
+    _player.playbackEventStream.map(_transformEvent).pipe(playbackState);
    
   }
 
@@ -53,32 +54,32 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   // just_audio state ကနေ audio_service state ပြောင်းပေးတဲ့ Helper function
-  // PlaybackState _transformEvent(PlaybackEvent event) {
-  //   return PlaybackState(
-  //     controls: [
-  //       MediaControl.rewind,
-  //       if (_player.playing) MediaControl.pause else MediaControl.play,
-  //       MediaControl.stop,
-  //       MediaControl.fastForward,
-  //     ],
-  //     systemActions: const {
-  //       MediaAction.seek,
-  //       MediaAction.seekForward,
-  //       MediaAction.seekBackward,
-  //     },
-  //     androidCompactActionIndices: const [0, 1, 3],
-  //     processingState: const {
-  //       ProcessingState.idle: AudioProcessingState.idle,
-  //       ProcessingState.loading: AudioProcessingState.loading,
-  //       ProcessingState.buffering: AudioProcessingState.buffering,
-  //       ProcessingState.ready: AudioProcessingState.ready,
-  //       ProcessingState.completed: AudioProcessingState.completed,
-  //     }[_player.processingState]!,
-  //     playing: _player.playing,
-  //     updatePosition: _player.position,
-  //     bufferedPosition: _player.bufferedPosition,
-  //     speed: _player.speed,
-  //     queueIndex: event.currentIndex,
-  //   );
-  // }
+  PlaybackState _transformEvent(PlaybackEvent event) {
+    return PlaybackState(
+      controls: [
+        MediaControl.rewind,
+        if (_player.playing) MediaControl.pause else MediaControl.play,
+        MediaControl.stop,
+        MediaControl.fastForward,
+      ],
+      systemActions: const {
+        MediaAction.seek,
+        MediaAction.seekForward,
+        MediaAction.seekBackward,
+      },
+      androidCompactActionIndices: const [0, 1, 3],
+      processingState: const {
+        ProcessingState.idle: AudioProcessingState.idle,
+        ProcessingState.loading: AudioProcessingState.loading,
+        ProcessingState.buffering: AudioProcessingState.buffering,
+        ProcessingState.ready: AudioProcessingState.ready,
+        ProcessingState.completed: AudioProcessingState.completed,
+      }[_player.processingState]!,
+      playing: _player.playing,
+      updatePosition: _player.position,
+      bufferedPosition: _player.bufferedPosition,
+      speed: _player.speed,
+      queueIndex: event.currentIndex,
+    );
+  }
 }

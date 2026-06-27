@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/my_audio_handler.dart';
@@ -31,6 +32,14 @@ class AudioStateController {
     _listenToAudioHandler();
   }
 
+  AudioFile? getAudioFileById(String id) {
+    final index = _state.list.indexWhere((e) => e.name == id);
+    if (index != -1) {
+      return state.list[index];
+    }
+    return null;
+  }
+
   Future<void> scanAudioList() async {
     try {
       _state = _state.copyWith(error: '', isLoading: true, list: []);
@@ -46,16 +55,20 @@ class AudioStateController {
     }
   }
 
+  Stream<PlaybackEvent> get playbackEventStream =>
+      _audioHandler.player.playbackEventStream;
+
   void _listenToAudioHandler() {
-    _audioHandler.player.playerStateStream.listen((event) {
-      if (event.processingState == .completed) {
-        _state = _state.copyWith(isPlaying: event.playing);
-        _controller.add(_state);
-      }
-    });
-    // _audioHandler.player.playerEventStream.listen((event) {
-    //   print('playerEventStream: ${event}');
+    // _audioHandler.player.playerStateStream.listen((event) {
+    //   if (event.processingState == .completed) {
+    //     _state = _state.copyWith(isPlaying: event.playing);
+    //     _controller.add(_state);
+    //     print('playerStateStream: $event');
+    //   }
     // });
+    _audioHandler.playbackState.listen((value) {
+      _state = _state.copyWith(isPlaying: value.playing);
+    });
 
     // သီချင်းပြောင်းသွားတာကို နားထောင်မယ်
     _audioHandler.mediaItem.listen((item) {
@@ -68,7 +81,6 @@ class AudioStateController {
     final item = MediaItem(id: id, title: title);
     _audioHandler.playAudioFile(filePath, item);
     _audioHandler.play();
-    _listenToAudioHandler();
   }
 
   Future<void> togglePlay() async {

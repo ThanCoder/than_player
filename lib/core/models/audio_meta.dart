@@ -21,7 +21,9 @@ class AudioMeta {
   void openMeta() {
     final file = TagLibFile.open(path);
     if (file != null) {
-      title = file.title;
+      if (file.title.isNotEmpty) {
+        title = file.title;
+      }
       album = file.album;
       artist = file.artist;
       bitrateMode = file.bitrateMode;
