@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:than_player/core/state/audio/audio_state_controller.dart';
 
 class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   final _player = AudioPlayer(handleAudioSessionActivation: false);
@@ -34,13 +35,23 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   @override
   Future<void> play() async {
     await _player.play();
-    await _startFade(targetVolume: 1.0, duration: Duration(milliseconds: 1000));
+    // await _startFade(targetVolume: 1.0, duration: Duration(milliseconds: 1000));
   }
 
   @override
   Future<void> pause() async {
-    await _startFade(targetVolume: 0.0, duration: Duration(milliseconds: 1000));
+    // await _startFade(targetVolume: 0.0, duration: Duration(milliseconds: 1000));
     await _player.pause();
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    AudioStateController.instance.prev();
+  }
+
+  @override
+  Future<void> skipToNext() async {
+    AudioStateController.instance.next();
   }
 
   @override
@@ -50,9 +61,8 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> stop() async {
-    await _startFade(targetVolume: 0.0, duration: Duration(milliseconds: 1000));
-    // ၁။ Player ကို အရင် ရပ်လိုက်ပါ
-    await _player.stop();
+    await _player.pause();
+    await seek(Duration(seconds: 0));
 
     // ၂။ audio_service ကို ရပ်လိုက်ပြီဖြစ်ကြောင်း အရင် အသိပေးပါ (System ကို အရင်ရှင်းတာ)
     playbackState.add(
@@ -64,26 +74,23 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
     // ၃။ super.stop() ကို အရင်ခေါ်ပြီး background service ကို အရင်သတ်ပါ
     await super.stop();
-
-    // ၄။ နောက်ဆုံးမှ media_kit ရဲ့ native references တွေကို သတ်ပစ်ပါ
-    await _player.dispose();
   }
 
   // 💡 ပြင်ဆင်ချက် ၃: Parameter ထဲက PlaybackEvent ကို ဖြုတ်လိုက်ပြီး _player ရဲ့ လက်ရှိ state အစစ်ကို တိုက်ရိုက်ယူခိုင်းလိုက်ပါတယ်
   PlaybackState _transformEvent() {
     return PlaybackState(
       controls: [
-        MediaControl.rewind,
+        MediaControl.skipToPrevious,
         if (_player.playing) MediaControl.pause else MediaControl.play,
+        MediaControl.skipToNext,
         MediaControl.stop,
-        MediaControl.fastForward,
       ],
       systemActions: const {
         MediaAction.seek,
-        MediaAction.seekForward,
-        MediaAction.seekBackward,
+        MediaAction.skipToNext,
+        MediaAction.skipToPrevious,
       },
-      androidCompactActionIndices: const [0, 1, 3],
+      androidCompactActionIndices: const [0, 1, 2],
       processingState:
           const {
             ProcessingState.idle: AudioProcessingState.idle,

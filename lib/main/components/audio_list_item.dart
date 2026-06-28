@@ -6,6 +6,7 @@ import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
+import 'package:than_player/extensions/build_context_exts.dart';
 
 class AudioListItem extends StatelessWidget {
   final AudioFile file;
@@ -34,6 +35,8 @@ class AudioListItem extends StatelessWidget {
             color:
                 state.currentSong != null && state.currentSong!.id == file.name
                 ? const Color.fromARGB(235, 18, 172, 159)
+                : context.brightness == .dark
+                ? Colors.black.withValues(alpha: .5)
                 : Colors.white.withValues(alpha: .7),
             child: Padding(
               padding: const EdgeInsets.all(4.0),
@@ -78,6 +81,7 @@ class AudioListItem extends StatelessWidget {
     return Row(
       children: [
         if (meta.duration != null) Text(meta.formatDuration),
+        IconButton(onPressed: () {}, icon: Icon(Icons.favorite, size: 20)),
         if (meta.artist != null)
           Expanded(child: Text(' - ${meta.artist!}', maxLines: 1)),
       ],
@@ -98,10 +102,8 @@ class AudioListItem extends StatelessWidget {
             bottom: 10,
             left: 0,
             right: 0,
-            child: Text(
-              state.isPlaying ? 'Playing...' : 'Stop',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.red),
+            child: Icon(
+              state.isPlaying ? Icons.play_circle : Icons.pause_circle,
             ),
           ),
       ],
@@ -110,10 +112,10 @@ class AudioListItem extends StatelessWidget {
 
   Widget get coverWidget {
     return FutureBuilder(
-      future: file.meta.readImageCache('${file.name.onlyName}.png'),
+      future: file.meta.readImageCache(file.cacheName),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: TLoaderRandom());
+          return Center(child: TLoader());
         }
         final cachePath = snapshot.data!;
         // print(cachePath);

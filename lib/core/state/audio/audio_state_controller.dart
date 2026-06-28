@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:dart_core_extensions/dart_core_extensions.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
@@ -60,7 +60,7 @@ class AudioStateController {
     if (state.currentSong == null) return '';
     final file = getAudioFileById(state.currentSong!.id);
     if (file == null) return '';
-    return await file.meta.readImageCache('${file.name.onlyName}.png');
+    return await file.meta.readImageCache(file.cacheName);
   }
 
   Future<void> scanAudioList() async {
@@ -111,9 +111,15 @@ class AudioStateController {
     });
   }
 
-  void playTrack(String filePath, String title, String id) {
-    final item = MediaItem(id: id, title: title);
-    _audioHandler.playAudioFile(filePath, item);
+  void playTrack(AudioFile file) {
+    debugPrint('file.cachCoverPath: ${file.cachCoverPath}');
+    final item = MediaItem(
+      id: file.name,
+      title: file.meta.title ?? file.name,
+      duration: file.meta.duration,
+      artUri: Uri.file(file.cachCoverPath),
+    );
+    _audioHandler.playAudioFile(file.path, item);
   }
 
   void seek(Duration duration) {
@@ -136,7 +142,7 @@ class AudioStateController {
       return;
     }
     final file = state.list[index - 1];
-    playTrack(file.path, file.meta.title ?? file.name, file.name);
+    playTrack(file);
   }
 
   void next() async {
@@ -147,6 +153,6 @@ class AudioStateController {
       return;
     }
     final file = state.list[index + 1];
-    playTrack(file.path, file.meta.title ?? file.name, file.name);
+    playTrack(file);
   }
 }

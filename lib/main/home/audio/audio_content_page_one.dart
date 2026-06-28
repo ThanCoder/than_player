@@ -119,21 +119,33 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
           const SizedBox(height: 40),
 
           // သီချင်းခေါင်းစဉ်နှင့် အဆိုတော်အမည်
-          marqueeWidget(currentAudioFile.meta.title ?? 'Unknown Title'),
+          marqueeWidget(currentAudioFile.meta.title ?? currentAudioFile.name),
           const SizedBox(height: 8),
-          Text(
-            currentAudioFile.meta.artist ?? 'Unknown Artist',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
-              fontSize: 16,
+          if (currentAudioFile.meta.artist != null)
+            Text(
+              currentAudioFile.meta.artist ?? 'Unknown Artist',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
+          if (currentAudioFile.meta.album != null)
+            Text(
+              currentAudioFile.meta.album ?? 'Unknown Album',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
 
           Spacer(),
           controlsWidget(state),
-          seekerWidget,
-          const SizedBox(height: 20),
+          AudioSeekerWidget(),
+          const SizedBox(height: 5),
+          menuWidget,
+          const SizedBox(height: 10),
         ],
       ),
     );
@@ -165,8 +177,15 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
     );
   }
 
-  Widget get seekerWidget {
-    return AudioSeekerWidget();
+  Widget get menuWidget {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        IconButton(onPressed: () {}, icon: Icon(Icons.timelapse)),
+        IconButton(onPressed: () {}, icon: Icon(Icons.favorite)),
+        IconButton(onPressed: () {}, icon: Icon(Icons.list)),
+      ],
+    );
   }
 
   Widget marqueeWidget(String title) {

@@ -10,4 +10,8 @@ extension BuildContextExts on BuildContext {
   void pop<T extends Object?>([T? result]) async {
     Navigator.pop<T>(this, result);
   }
+
+  Brightness get brightness {
+    return Theme.brightnessOf(this);
+  }
 }

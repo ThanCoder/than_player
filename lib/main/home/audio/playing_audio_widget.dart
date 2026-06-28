@@ -6,7 +6,7 @@ import 'package:marquee/marquee.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
-import 'package:than_player/core/utils/utils.dart';
+import 'package:than_player/extensions/build_context_exts.dart';
 
 class PlayingAudioWidget extends StatelessWidget {
   const PlayingAudioWidget({super.key});
@@ -31,9 +31,12 @@ class PlayingAudioWidget extends StatelessWidget {
         if (audioFile == null) {
           return SizedBox.fromSize();
         }
-
         return Container(
-          decoration: BoxDecoration(color: Colors.white),
+          decoration: BoxDecoration(
+            color: context.brightness == .dark
+                ? const Color.fromARGB(255, 15, 15, 15)
+                : Colors.white,
+          ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(

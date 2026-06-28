@@ -8,7 +8,7 @@ class MorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('More')),
+      appBar: AppBar(title: Text('Than Player')),
       body: TScrollableColumn(
         children: [
           Card(

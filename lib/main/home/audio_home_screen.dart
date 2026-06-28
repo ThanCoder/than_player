@@ -42,16 +42,18 @@ class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Audio Player'),
-        actions: [
-          if (TPlatform.isDesktop)
-            IconButton(
-              onPressed: AudioStateController.instance.scanAudioList,
-              icon: Icon(Icons.refresh),
+      appBar: !TPlatform.isDesktop
+          ? null
+          : AppBar(
+              title: Text('Audio Player'),
+              actions: [
+                if (TPlatform.isDesktop)
+                  IconButton(
+                    onPressed: AudioStateController.instance.scanAudioList,
+                    icon: Icon(Icons.refresh),
+                  ),
+              ],
             ),
-        ],
-      ),
       body: Stack(
         children: [
           Positioned.fill(child: backgroundCoverWidget),
@@ -100,15 +102,17 @@ class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
         }
         return RefreshIndicator.adaptive(
           onRefresh: init,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(child: headerWidget(state)),
-              // list
-              SliverList.builder(
-                itemCount: state.list.length,
-                itemBuilder: (context, index) => listItem(state.list[index]),
-              ),
-            ],
+          child: SafeArea(
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(child: headerWidget(state)),
+                // list
+                SliverList.builder(
+                  itemCount: state.list.length,
+                  itemBuilder: (context, index) => listItem(state.list[index]),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -118,7 +122,9 @@ class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
   Widget headerWidget(AudioState state) {
     return Container(
       padding: const EdgeInsets.all(8.0),
-      color: Colors.white,
+      color: context.brightness == .dark
+          ? const Color.fromARGB(255, 31, 31, 31)
+          : Colors.white,
       child: Row(
         children: [
           Text('${state.list.length} Songs'),
@@ -133,11 +139,7 @@ class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
     return AudioListItem(
       file: file,
       onClicked: (file) {
-        AudioStateController.instance.playTrack(
-          file.path,
-          file.meta.title ?? file.name,
-          file.name,
-        );
+        AudioStateController.instance.playTrack(file);
       },
     );
   }
