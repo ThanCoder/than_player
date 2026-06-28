@@ -24,11 +24,22 @@ class AudioMeta {
       if (file.title.isNotEmpty) {
         title = file.title;
       }
-      album = file.album;
-      artist = file.artist;
-      bitrateMode = file.bitrateMode;
-      comment = file.comment;
-      genre = file.genre;
+
+      if (file.album.isNotEmpty) {
+        album = file.album;
+      }
+      if (file.artist.isNotEmpty) {
+        artist = file.artist;
+      }
+      if (file.bitrateMode.isNotEmpty) {
+        bitrateMode = file.bitrateMode;
+      }
+      if (file.comment.isNotEmpty) {
+        comment = file.comment;
+      }
+      if (file.genre.isNotEmpty) {
+        genre = file.genre;
+      }
       coverMimeType = file.coverMimeType;
       hasCover = file.hasCover;
       duration = file.duration;

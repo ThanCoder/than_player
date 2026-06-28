@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
@@ -32,12 +33,34 @@ class AudioStateController {
     _listenToAudioHandler();
   }
 
+  void refershState() {
+    _controller.add(_state);
+  }
+
   AudioFile? getAudioFileById(String id) {
     final index = _state.list.indexWhere((e) => e.name == id);
     if (index != -1) {
       return state.list[index];
     }
     return null;
+  }
+
+  AudioFile? get currentAudioFile {
+    if (state.currentSong == null) return null;
+    final index = _state.list.indexWhere(
+      (e) => e.name == state.currentSong!.id,
+    );
+    if (index != -1) {
+      return state.list[index];
+    }
+    return null;
+  }
+
+  Future<String> get currentCoverPath async {
+    if (state.currentSong == null) return '';
+    final file = getAudioFileById(state.currentSong!.id);
+    if (file == null) return '';
+    return await file.meta.readImageCache('${file.name.onlyName}.png');
   }
 
   Future<void> scanAudioList() async {
@@ -59,15 +82,26 @@ class AudioStateController {
       _audioHandler.player.playbackEventStream;
 
   void _listenToAudioHandler() {
-    // _audioHandler.player.playerStateStream.listen((event) {
-    //   if (event.processingState == .completed) {
-    //     _state = _state.copyWith(isPlaying: event.playing);
-    //     _controller.add(_state);
-    //     print('playerStateStream: $event');
-    //   }
-    // });
     _audioHandler.playbackState.listen((value) {
-      _state = _state.copyWith(isPlaying: value.playing);
+      // song end
+
+      if (value.playing != state.isPlaying) {
+        _state = _state.copyWith(isPlaying: value.playing);
+        _controller.add(_state);
+      }
+      bool _isNextSongTriggered = false; // အပေါ်မှာ Flag တစ်ခု ကြေညာထားမယ်
+
+      // listen ထဲမှာ ဒီလို စစ်ပါ
+      if (value.processingState == AudioProcessingState.completed) {
+        if (!_isNextSongTriggered) {
+          _state = _state.copyWith(isPlaying: false);
+          _controller.add(_state);
+          _isNextSongTriggered = true; // တစ်ခါဝင်ပြီးရင် ပိတ်လိုက်မယ်
+          next(); //go next song
+        }
+      } else {
+        _isNextSongTriggered = false;
+      }
     });
 
     // သီချင်းပြောင်းသွားတာကို နားထောင်မယ်
@@ -80,7 +114,10 @@ class AudioStateController {
   void playTrack(String filePath, String title, String id) {
     final item = MediaItem(id: id, title: title);
     _audioHandler.playAudioFile(filePath, item);
-    _audioHandler.play();
+  }
+
+  void seek(Duration duration) {
+    _audioHandler.seek(duration);
   }
 
   Future<void> togglePlay() async {
@@ -89,5 +126,27 @@ class AudioStateController {
     } else {
       await _audioHandler.play();
     }
+  }
+
+  void prev() async {
+    final current = state.currentSong;
+    if (current == null) return;
+    final index = _state.list.indexWhere((e) => e.name == current.id);
+    if (index == -1) {
+      return;
+    }
+    final file = state.list[index - 1];
+    playTrack(file.path, file.meta.title ?? file.name, file.name);
+  }
+
+  void next() async {
+    final current = state.currentSong;
+    if (current == null) return;
+    final index = _state.list.indexWhere((e) => e.name == current.id);
+    if (index > state.list.length) {
+      return;
+    }
+    final file = state.list[index + 1];
+    playTrack(file.path, file.meta.title ?? file.name, file.name);
   }
 }

@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:marquee/marquee.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
@@ -73,19 +74,19 @@ class PlayingAudioWidget extends StatelessWidget {
     final meta = audioFile.meta;
 
     return [
-      if (meta.title != null)
-        Text(meta.title!, style: TextStyle(fontSize: 12))
-      else
-        Text(
-          audioFile.name,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 12),
+      SizedBox(
+        width: double.infinity,
+        height: 20,
+        child: Marquee(
+          text: meta.title ?? audioFile.name,
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-      if (playbackEvent.duration != null)
-        Text(
-          '${playbackEvent.updatePosition.formatTimeLable()}/${playbackEvent.duration!.formatTimeLable()}',
-        ),
+      ),
+      if (meta.artist != null) Text(meta.artist!, maxLines: 1),
+      // if (playbackEvent.duration != null)
+      //   Text(
+      //     '${playbackEvent.updatePosition.formatTimeLable()}/${playbackEvent.duration!.formatTimeLable()}',
+      //   ),
 
       // song progress
       songProgressWidget(playbackEvent),
@@ -99,8 +100,8 @@ class PlayingAudioWidget extends StatelessWidget {
       },
       icon: Icon(
         AudioStateController.instance.state.isPlaying
-            ? Icons.play_arrow
-            : Icons.pause,
+            ? Icons.pause
+            : Icons.play_arrow,
       ),
     );
   }
@@ -110,7 +111,7 @@ class PlayingAudioWidget extends StatelessWidget {
       stream: AudioStateController.instance.playbackEventStream,
       builder: (context, snapshot) {
         final event = snapshot.data;
-        if (event != null && event.duration != null ) {
+        if (event != null && event.duration != null) {
           // print(event);
           final dur = event.duration!.inMilliseconds;
           final cur = event.updatePosition.inMilliseconds;

@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart' hide TPlatform;
-import 'package:than_player/components/audio_list_item.dart';
+import 'package:than_player/core/state/audio/audio_state.dart';
+import 'package:than_player/extensions/build_context_exts.dart';
+import 'package:than_player/main/components/audio_list_item.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
+import 'package:than_player/main/home/audio/audio_content_page_one.dart';
 import 'package:than_player/main/home/audio/playing_audio_widget.dart';
 
 class LinuxAudioHomeScreen extends StatefulWidget {
@@ -22,11 +27,16 @@ class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
   }
 
   Future<void> init() async {
-    if (!await ThanPkg.platform.isStoragePermissionGranted()) {
-      await ThanPkg.platform.requestStoragePermission();
-      return;
+    try {
+      if (!await ThanPkg.platform.isStoragePermissionGranted()) {
+        await ThanPkg.platform.requestStoragePermission();
+        return;
+      }
+      await AudioStateController.instance.scanAudioList();
+    } catch (e) {
+      if (!mounted) return;
+      showTMessageDialogError(context, e.toString());
     }
-    await AudioStateController.instance.scanAudioList();
   }
 
   @override
@@ -44,10 +54,35 @@ class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
       ),
       body: Stack(
         children: [
+          Positioned.fill(child: backgroundCoverWidget),
           Positioned.fill(child: listWidget),
           Positioned(bottom: 0, left: 0, right: 0, child: playingWidget),
         ],
       ),
+    );
+  }
+
+  Widget get backgroundCoverWidget {
+    return StreamBuilder(
+      stream: AudioStateController.instance.stateStream,
+      builder: (context, asyncSnapshot) {
+        return FutureBuilder(
+          future: AudioStateController().currentCoverPath,
+          builder: (context, snapshot) {
+            final coverFile = File(snapshot.data ?? '');
+            if (!coverFile.existsSync()) {
+              return SizedBox.fromSize();
+            }
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: .4),
+              ),
+
+              child: TImageFile(path: snapshot.data ?? ''),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -65,13 +100,32 @@ class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
         }
         return RefreshIndicator.adaptive(
           onRefresh: init,
-          child: ListView.separated(
-            itemCount: state.list.length,
-            separatorBuilder: (context, index) => Divider(),
-            itemBuilder: (context, index) => listItem(state.list[index]),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: headerWidget(state)),
+              // list
+              SliverList.builder(
+                itemCount: state.list.length,
+                itemBuilder: (context, index) => listItem(state.list[index]),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget headerWidget(AudioState state) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      color: Colors.white,
+      child: Row(
+        children: [
+          Text('${state.list.length} Songs'),
+          Spacer(),
+          IconButton(onPressed: () {}, icon: Icon(Icons.sort)),
+        ],
+      ),
     );
   }
 
@@ -89,6 +143,11 @@ class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
   }
 
   Widget get playingWidget {
-    return PlayingAudioWidget();
+    return InkWell(
+      onTap: () {
+        context.push(builder: (mainContext) => AudioContentPageOne());
+      },
+      child: PlayingAudioWidget(),
+    );
   }
 }
