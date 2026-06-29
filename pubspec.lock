@@ -73,6 +73,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  cfb_store:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "73d67838eda5a978c56ff633fdbae5282cc0436d"
+      url: "https://github.com/ThanCoder/cfb_store_dart.git"
+    source: git
+    version: "0.1.0"
   change_app_package_name:
     dependency: "direct dev"
     description:

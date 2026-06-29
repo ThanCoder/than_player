@@ -1,3 +1,4 @@
+import 'package:cfb_store/cfb_store.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:t_widgets/t_widgets.dart';
@@ -25,6 +26,10 @@ void main() async {
     android: true, // default: false - dependency: media_kit_libs_android_audio
   );
   await AudioStateController.instance.init();
+
+  await CFBStoreBase.getInstance.open(
+    Utils.instance.getConfigPath('config.store.cfb'),
+  );
 
   runApp(const MainApp());
 }

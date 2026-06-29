@@ -12,14 +12,14 @@ import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/main/home/audio/audio_content_page_one.dart';
 import 'package:than_player/main/home/audio/playing_audio_widget.dart';
 
-class LinuxAudioHomeScreen extends StatefulWidget {
-  const LinuxAudioHomeScreen({super.key});
+class AudioHomeScreen extends StatefulWidget {
+  const AudioHomeScreen({super.key});
 
   @override
-  State<LinuxAudioHomeScreen> createState() => _LinuxAudioHomeScreenState();
+  State<AudioHomeScreen> createState() => _AudioHomeScreenState();
 }
 
-class _LinuxAudioHomeScreenState extends State<LinuxAudioHomeScreen> {
+class _AudioHomeScreenState extends State<AudioHomeScreen> {
   @override
   void initState() {
     init();

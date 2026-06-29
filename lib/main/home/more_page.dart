@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/core/utils/utils.dart';
+import 'package:than_player/main/material_theme_provider.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -11,6 +12,7 @@ class MorePage extends StatelessWidget {
       appBar: AppBar(title: Text('Than Player')),
       body: TScrollableColumn(
         children: [
+          Card(child: MaterialThemeProviderChooser()),
           Card(
             child: ListTile(
               title: Text("Version: ${Utils.instance.packageInfo.version}"),
