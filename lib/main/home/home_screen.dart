@@ -14,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final pages = [AudioHomePage(), VideoHomePage(), MorePage(key: UniqueKey())];
   int index = 0;
   @override
   Widget build(BuildContext context) {
@@ -22,9 +21,16 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: IndexedStack(index: index, children: pages),
+            child: IndexedStack(
+              index: index,
+              children: [
+                AudioHomePage(),
+                VideoHomePage(isCurrentPage: index == 1),
+                MorePage(key: UniqueKey()),
+              ],
+            ),
           ),
-          
+
           Positioned(bottom: 0, left: 0, right: 0, child: playingWidget),
         ],
       ),

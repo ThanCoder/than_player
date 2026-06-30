@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:t_widgets/t_widgets.dart';
+import 'package:than_pkg/than_pkg.dart';
 // import 'package:than_pkg/than_pkg.dart';
 import 'package:than_player/core/models/video_file.dart';
 
@@ -16,6 +19,7 @@ class VideoContentScreen extends StatefulWidget {
 class _VideoContentScreenState extends State<VideoContentScreen> {
   late final player = Player();
   late final controller = VideoController(player);
+  bool isKeepProtraitMode = false;
 
   @override
   void initState() {
@@ -35,6 +39,19 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
   Future<void> init() async {
     try {
       await player.open(Media(widget.file.path));
+
+      late StreamSubscription<VideoParams> videoParamsSub;
+      videoParamsSub = player.stream.videoParams.listen((event) {
+        if (player.state.width != null && player.state.height != null) {
+          if (player.state.width != null && player.state.height != null) {
+            isKeepProtraitMode =
+                (player.state.width! / player.state.height!) < 0.8;
+            setState(() {});
+
+            videoParamsSub.cancel();
+          }
+        }
+      });
     } catch (e) {
       debugPrint('[_VideoContentScreenState:init]: $e');
       if (!mounted) return;
@@ -44,9 +61,12 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Stack(children: [playerWidget]),
+    return Theme(
+      data: ThemeData.dark(),
+      child: Scaffold(
+        appBar: TPlatform.isDesktop ? AppBar() : null,
+        body: Stack(children: [playerWidget]),
+      ),
     );
   }
 
@@ -59,6 +79,9 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
     if (player.state.height != null) {
       videoHeight = player.state.height!.toDouble();
     }
+
+    // print('aspectRatio: ${videoWidth / videoHeight}');
+    // print('isKeepProtraitMode: $isKeepProtraitMode');
     return Positioned.fill(
       top: 0,
       left: 0,
@@ -69,7 +92,23 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
           width: videoWidth,
           height: videoHeight,
           // Use [Video] widget to display video output.
-          child: Video(controller: controller),
+          child: Video(
+            controller: controller,
+            onEnterFullscreen: () async {
+              if (isKeepProtraitMode) {
+                await ThanPkg.platform.toggleFullScreen(isFullScreen: true);
+              } else {
+                await defaultEnterNativeFullscreen();
+              }
+            },
+            onExitFullscreen: () async {
+              if (isKeepProtraitMode) {
+                await ThanPkg.platform.toggleFullScreen(isFullScreen: false);
+              } else {
+                await defaultExitNativeFullscreen();
+              }
+            },
+          ),
         ),
       ),
     );
