@@ -110,38 +110,38 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   //***********Fade Effect************ */
   // 💡 Fade ကို ထိန်းချုပ်ဖို့ Timer တစ်ခု သတ်မှတ်မယ်
-  Timer? _fadeTimer;
+  // Timer? _fadeTimer;
 
   // ... (Constructor တွေ ရှိပြီးသားအတိုင်း ထားပါ)
 
   // 💡 ဒါက အသံကို တုန်မသွားစေဘဲ ပုရွက်ဆိတ်လျှောက်သလို ညင်သာအောင် အသံညှိပေးမယ့် Master Function ပါ
-  Future<void> _startFade({
-    required double targetVolume,
-    required Duration duration,
-  }) async {
-    _fadeTimer?.cancel(); // လည်နေတဲ့ အဟောင်းရှိရင် အရင်သတ်မယ်
+  // Future<void> _startFade({
+  //   required double targetVolume,
+  //   required Duration duration,
+  // }) async {
+  //   _fadeTimer?.cancel(); // လည်နေတဲ့ အဟောင်းရှိရင် အရင်သတ်မယ်
 
-    final int steps = 20;
-    final int interval = duration.inMilliseconds ~/ steps;
-    final double startVolume = _player.volume;
-    final double volumeDiff = targetVolume - startVolume;
-    int currentStep = 0;
+  //   final int steps = 20;
+  //   final int interval = duration.inMilliseconds ~/ steps;
+  //   final double startVolume = _player.volume;
+  //   final double volumeDiff = targetVolume - startVolume;
+  //   int currentStep = 0;
 
-    _fadeTimer = Timer.periodic(Duration(milliseconds: interval), (
-      timer,
-    ) async {
-      currentStep++;
-      final double newVolume =
-          startVolume + (volumeDiff * (currentStep / steps));
+  //   _fadeTimer = Timer.periodic(Duration(milliseconds: interval), (
+  //     timer,
+  //   ) async {
+  //     currentStep++;
+  //     final double newVolume =
+  //         startVolume + (volumeDiff * (currentStep / steps));
 
-      // Target ရောက်ရင် ရပ်မယ်
-      if (currentStep >= steps) {
-        await _player.setVolume(targetVolume);
-        timer.cancel();
-      } else {
-        await _player.setVolume(newVolume);
-      }
-    });
-    await Future.delayed(duration);
-  }
+  //     // Target ရောက်ရင် ရပ်မယ်
+  //     if (currentStep >= steps) {
+  //       await _player.setVolume(targetVolume);
+  //       timer.cancel();
+  //     } else {
+  //       await _player.setVolume(newVolume);
+  //     }
+  //   });
+  //   await Future.delayed(duration);
+  // }
 }

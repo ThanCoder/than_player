@@ -30,6 +30,7 @@ class AudioScanner extends PathScanner<AudioFile> {
         dirname: entry.parent.onlyName,
         date: entry.modifiedDate,
         meta: meta,
+        size: entry.size
       );
     }
     return null;

@@ -6,7 +6,6 @@ import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
-import 'package:than_player/core/utils/utils.dart';
 import 'package:than_player/main/home/audio/audio_seeker_widget.dart';
 
 class AudioContentPageOne extends StatefulWidget {

@@ -11,12 +11,13 @@ class AudioFile {
   final String dirname;
   final DateTime date;
   final AudioMeta meta;
-  AudioFile({
+  final int size;
+  const AudioFile({
     required this.name,
     required this.path,
     required this.dirname,
     required this.date,
-    required this.meta,
+    required this.meta, required this.size,
   });
   String get cacheName {
     final digest = md5.convert(utf8.encode(name.onlyName));
@@ -29,6 +30,26 @@ class AudioFile {
 }
 
 extension AudioFileExt on List<AudioFile> {
+  void sortName({bool isA2Z = true}) {
+    sort((a, b) {
+      if (isA2Z) {
+        return a.name.compareTo(b.name);
+      } else {
+        return b.name.compareTo(a.name);
+      }
+    });
+  }
+
+  void sortSize({bool smToBig = true}) {
+    sort((a, b) {
+      if (smToBig) {
+        return a.size.compareTo(b.size);
+      } else {
+        return b.size.compareTo(a.size);
+      }
+    });
+  }
+
   void sortDate({bool isNewest = true}) {
     sort((a, b) {
       if (isNewest) {

@@ -17,23 +17,26 @@ class _CacheManagerListTileState extends State<CacheManagerListTile> {
   bool needToClean = false;
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.cleaning_services_sharp),
-      title: FutureBuilder(
-        future: Utils().getFolderInfo(Directory(widget.cacheDirPath)),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Text('စစ်ဆေးနေပါတယ်.....');
-          }
-          final data = snapshot.data;
-          if (data == null) return SizedBox.shrink();
-          needToClean = data.$1 > 0;
-          return Text(
-            'Cache: Count: ${data.$1} - Size: ${data.$2.fileSizeLabel()}',
-          );
-        },
-      ),
-      onTap: _showCaleanConfirm,
+    return FutureBuilder(
+      future: Utils().getFolderInfo(Directory(widget.cacheDirPath)),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == .waiting) {
+          return Text('စစ်ဆေးနေပါတယ်.....');
+        }
+        final data = snapshot.data;
+        if (data == null) return SizedBox.shrink();
+        needToClean = data.$1 > 0;
+
+        return Card(
+          child: ListTile(
+            leading: Icon(Icons.cleaning_services_sharp),
+            title: Text(
+              'Cache: Count: ${data.$1} - Size: ${data.$2.fileSizeLabel()}',
+            ),
+            onTap: _showCaleanConfirm,
+          ),
+        );
+      },
     );
   }
 

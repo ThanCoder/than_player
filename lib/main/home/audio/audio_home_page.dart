@@ -9,8 +9,7 @@ import 'package:than_player/extensions/build_context_exts.dart';
 import 'package:than_player/main/components/audio_list_item.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
-import 'package:than_player/main/home/audio/audio_content_page_one.dart';
-import 'package:than_player/main/home/audio/playing_audio_widget.dart';
+import 'package:than_player/partials/sort_provider.dart';
 
 class AudioHomePage extends StatefulWidget {
   const AudioHomePage({super.key});
@@ -140,7 +139,18 @@ class _AudioHomePageState extends State<AudioHomePage> {
         children: [
           Text('${state.list.length} Songs'),
           Spacer(),
-          IconButton(onPressed: () {}, icon: Icon(Icons.sort)),
+          StreamBuilder(
+                  stream: AudioStateController().stateStream,
+                  builder: (context, asyncSnapshot) {
+                    return SortButton(
+                      value: AudioStateController().state.sortItem,
+                      list: AudioStateController().sortList,
+                      onApply: (item) {
+                        AudioStateController().setSort(item);
+                      },
+                    );
+                  },
+                ),
         ],
       ),
     );

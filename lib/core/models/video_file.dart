@@ -29,6 +29,26 @@ class VideoFile {
 }
 
 extension VideoFileExt on List<VideoFile> {
+  void sortName({bool isA2Z = true}) {
+    sort((a, b) {
+      if (isA2Z) {
+        return a.name.compareTo(b.name);
+      } else {
+        return b.name.compareTo(a.name);
+      }
+    });
+  }
+
+  void sortSize({bool smToBig = true}) {
+    sort((a, b) {
+      if (smToBig) {
+        return a.size.compareTo(b.size);
+      } else {
+        return b.size.compareTo(a.size);
+      }
+    });
+  }
+
   void sortDate({bool isNewest = true}) {
     sort((a, b) {
       if (isNewest) {

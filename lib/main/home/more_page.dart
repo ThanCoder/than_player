@@ -21,9 +21,7 @@ class MorePage extends StatelessWidget {
               title: Text("Version: ${Utils.instance.packageInfo.version}"),
             ),
           ),
-          Card(
-            child: CacheManagerListTile(cacheDirPath: Utils.instance.cachePath),
-          ),
+          CacheManagerListTile(cacheDirPath: Utils.instance.cachePath),
           if (kDebugMode)
             Card(
               child: ListTile(

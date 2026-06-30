@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:cfb_store/cfb_store.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:than_player/core/models/audio_file.dart';
@@ -9,6 +9,7 @@ import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/my_audio_handler.dart';
 import 'package:than_player/core/utils/audio_scanner.dart';
 import 'package:than_player/core/utils/utils.dart';
+import 'package:than_player/partials/sort_provider.dart';
 
 class AudioStateController {
   static AudioStateController instance = AudioStateController._();
@@ -19,6 +20,11 @@ class AudioStateController {
   Stream<AudioState> get stateStream => _controller.stream;
   AudioState _state = AudioState.empty();
   AudioState get state => _state;
+  final List<SortItem> sortList = [
+    SortItem.nameSortItem,
+    SortItem.dateSortItem,
+    SortItem.sizeSortItem,
+  ];
 
   late MyAudioHandler _audioHandler;
 
@@ -37,17 +43,57 @@ class AudioStateController {
 
   Future<void> scanAudioList() async {
     try {
-      _state = _state.copyWith(error: '', isLoading: true, list: []);
+      //**************Sort****************** */
+      SortItem sortItem = sortList[1];
+      final recentSortId = CFBStoreBase.getInstance.getInt(
+        'audio-file-sort-id',
+        sortItem.id,
+      );
+      final recentSortTrue = CFBStoreBase.getInstance.getBool(
+        'audio-file-sort-true',
+      );
+      if (recentSortId != sortItem.id) {
+        final index = sortList.indexWhere((e) => e.id == recentSortId);
+        if (index != -1) {
+          sortItem = sortList[index].copyWith(isTrue: recentSortTrue);
+        }
+      }
+      _state = _state.copyWith(
+        error: '',
+        isLoading: true,
+        list: [],
+        sortItem: sortItem,
+      );
       _controller.add(_state);
 
       final list = await AudioScanner().scan();
-      list.sortDate();
       _state = _state.copyWith(isLoading: false, list: list);
+      sort();
       _controller.add(_state);
     } catch (e) {
       _state = _state.copyWith(error: e.toString(), isLoading: false);
       _controller.add(_state);
     }
+  }
+
+  void sort() {
+    if (_state.sortItem.id == SortItem.nameSortItem.id) {
+      _state.list.sortName(isA2Z: _state.sortItem.isTrue);
+    } else if (_state.sortItem.id == SortItem.dateSortItem.id) {
+      _state.list.sortDate(isNewest: _state.sortItem.isTrue);
+    } else if (_state.sortItem.id == SortItem.sizeSortItem.id) {
+      _state.list.sortSize(smToBig: _state.sortItem.isTrue);
+    }
+  }
+
+  void setSort(SortItem item) {
+    CFBStoreBase.getInstance.put('audio-file-sort-id', item.id);
+    CFBStoreBase.getInstance.put('audio-file-sort-true', item.isTrue);
+    CFBStoreBase.getInstance.writeAll();
+
+    _state = _state.copyWith(sortItem: item);
+    sort();
+    _controller.add(_state);
   }
 
   Stream<PlaybackEvent> get playbackEventStream =>

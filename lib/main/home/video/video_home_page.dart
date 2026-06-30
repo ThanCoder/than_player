@@ -6,6 +6,7 @@ import 'package:than_player/core/state/video/video_state_controller.dart';
 import 'package:than_player/extensions/build_context_exts.dart';
 import 'package:than_player/main/components/video_list_item.dart';
 import 'package:than_player/main/home/video/video_content_screen.dart';
+import 'package:than_player/partials/sort_provider.dart';
 
 class VideoHomePage extends StatefulWidget {
   const VideoHomePage({super.key});
@@ -27,7 +28,6 @@ class _VideoHomePageState extends State<VideoHomePage> {
         await ThanPkg.platform.requestStoragePermission();
         return;
       }
-      print('call video');
       await VideoStateController.instance.scanList();
     } catch (e) {
       if (!mounted) return;
@@ -45,6 +45,18 @@ class _VideoHomePageState extends State<VideoHomePage> {
               actions: [
                 if (TPlatform.isDesktop)
                   IconButton(onPressed: init, icon: Icon(Icons.refresh)),
+                StreamBuilder(
+                  stream: VideoStateController().stateStream,
+                  builder: (context, asyncSnapshot) {
+                    return SortButton(
+                      value: VideoStateController().state.sortItem,
+                      list: VideoStateController().sortList,
+                      onApply: (item) {
+                        VideoStateController().setSort(item);
+                      },
+                    );
+                  },
+                ),
               ],
             ),
       body: listWidget,
