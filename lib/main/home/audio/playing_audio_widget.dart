@@ -14,46 +14,60 @@ class PlayingAudioWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: AudioStateController.instance.playbackEventStream,
+      stream: AudioStateController().stateStream,
+      initialData: AudioStateController().state,
       builder: (context, snapshot) {
-        PlaybackEvent? playbackEvent = snapshot.data;
-        if (playbackEvent == null) {
-          return SizedBox.fromSize();
+        final state = snapshot.data!;
+        if (!state.showFloatingAudioWidget) {
+          return SizedBox.shrink();
         }
-        MediaItem? currentSong =
-            AudioStateController.instance.state.currentSong;
-        if (currentSong == null) {
-          return SizedBox.fromSize();
-        }
-        final audioFile = AudioStateController().getAudioFileById(
-          currentSong.id,
-        );
-        if (audioFile == null) {
-          return SizedBox.fromSize();
-        }
-        return Container(
-          decoration: BoxDecoration(
-            color: context.brightness == .dark
-                ? const Color.fromARGB(255, 15, 15, 15)
-                : Colors.white,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              spacing: 4,
-              children: [
-                SizedBox(width: 40, height: 40, child: coverWidget(audioFile)),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 3,
-                    children: metaWidget(audioFile, playbackEvent),
-                  ),
+        return StreamBuilder(
+          stream: AudioStateController.instance.playbackEventStream,
+          builder: (context, snapshot) {
+            PlaybackEvent? playbackEvent = snapshot.data;
+            if (playbackEvent == null) {
+              return SizedBox.fromSize();
+            }
+            MediaItem? currentSong =
+                AudioStateController.instance.state.currentSong;
+            if (currentSong == null) {
+              return SizedBox.fromSize();
+            }
+            final audioFile = AudioStateController().getAudioFileById(
+              currentSong.id,
+            );
+            if (audioFile == null) {
+              return SizedBox.fromSize();
+            }
+            return Container(
+              decoration: BoxDecoration(
+                color: context.brightness == .dark
+                    ? const Color.fromARGB(255, 15, 15, 15)
+                    : Colors.white,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  spacing: 4,
+                  children: [
+                    SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: coverWidget(audioFile),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 3,
+                        children: metaWidget(audioFile, playbackEvent),
+                      ),
+                    ),
+                    handlerWidget(playbackEvent),
+                  ],
                 ),
-                handlerWidget(playbackEvent),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -97,15 +111,25 @@ class PlayingAudioWidget extends StatelessWidget {
   }
 
   Widget handlerWidget(PlaybackEvent playbackEvent) {
-    return IconButton(
-      onPressed: () {
-        AudioStateController.instance.togglePlay();
-      },
-      icon: Icon(
-        AudioStateController.instance.state.isPlaying
-            ? Icons.pause
-            : Icons.play_arrow,
-      ),
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () {
+            AudioStateController.instance.togglePlay();
+          },
+          icon: Icon(
+            AudioStateController.instance.state.isPlaying
+                ? Icons.pause
+                : Icons.play_arrow,
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            AudioStateController().setVisiableFloatingAudioWidget(false);
+          },
+          icon: Icon(Icons.close),
+        ),
+      ],
     );
   }
 

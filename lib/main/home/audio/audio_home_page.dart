@@ -12,14 +12,14 @@ import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/main/home/audio/audio_content_page_one.dart';
 import 'package:than_player/main/home/audio/playing_audio_widget.dart';
 
-class AudioHomeScreen extends StatefulWidget {
-  const AudioHomeScreen({super.key});
+class AudioHomePage extends StatefulWidget {
+  const AudioHomePage({super.key});
 
   @override
-  State<AudioHomeScreen> createState() => _AudioHomeScreenState();
+  State<AudioHomePage> createState() => _AudioHomePageState();
 }
 
-class _AudioHomeScreenState extends State<AudioHomeScreen> {
+class _AudioHomePageState extends State<AudioHomePage> {
   @override
   void initState() {
     init();
@@ -54,12 +54,23 @@ class _AudioHomeScreenState extends State<AudioHomeScreen> {
                   ),
               ],
             ),
-      body: Stack(
-        children: [
-          Positioned.fill(child: backgroundCoverWidget),
-          Positioned.fill(child: listWidget),
-          Positioned(bottom: 0, left: 0, right: 0, child: playingWidget),
-        ],
+      body: StreamBuilder(
+        stream: AudioStateController().stateStream,
+        initialData: AudioStateController().state,
+        builder: (context, snapshot) {
+          final state = snapshot.data!;
+
+          return Stack(
+            children: [
+              Positioned.fill(child: backgroundCoverWidget),
+              Positioned.fill(
+                bottom: state.showFloatingAudioWidget ? 70 : 0,
+                child: listWidget,
+              ),
+              // Positioned(bottom: 0, left: 0, right: 0, child: playingWidget),
+            ],
+          );
+        },
       ),
     );
   }
@@ -141,15 +152,6 @@ class _AudioHomeScreenState extends State<AudioHomeScreen> {
       onClicked: (file) {
         AudioStateController.instance.playTrack(file);
       },
-    );
-  }
-
-  Widget get playingWidget {
-    return InkWell(
-      onTap: () {
-        context.push(builder: (mainContext) => AudioContentPageOne());
-      },
-      child: PlayingAudioWidget(),
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter_taglib/flutter_taglib.dart';
+import 'package:mime/mime.dart';
 import 'package:than_player/core/utils/utils.dart';
 
 class AudioMeta {
@@ -17,13 +19,18 @@ class AudioMeta {
   String? genre;
   bool hasCover = false;
   Duration? duration;
+  AudioInfo? info;
+  String? format;
 
   void openMeta() {
+    final mm = lookupMimeType(path);
+    format = mm;
     final file = TagLibFile.open(path);
     if (file != null) {
       if (file.title.isNotEmpty) {
         title = file.title;
       }
+      info = file.audioInfo;
 
       if (file.album.isNotEmpty) {
         album = file.album;
@@ -54,6 +61,27 @@ class AudioMeta {
     final secs = duration!.inSeconds % 60;
 
     return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+  }
+
+  String get formatLabel {
+    if (format != null) {
+      return path.extName.toUpperCase();
+    }
+    return 'Unknown';
+  }
+
+  String get bitrateLabel {
+    if (info != null) {
+      return '${info!.bitrate} kb/s';
+    }
+    return '';
+  }
+
+  String get sampleRateLabel {
+    if (info != null) {
+      return '${info!.sampleRate / 1000} kHz';
+    }
+    return '';
   }
 
   Future<Uint8List?> readImageAsync() async {

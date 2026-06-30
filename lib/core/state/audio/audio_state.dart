@@ -10,6 +10,7 @@ class AudioState {
   final int sortId;
   final bool isAsc;
   final bool isPlaying;
+  final bool showFloatingAudioWidget;
   final MediaItem? currentSong;
   const AudioState({
     required this.error,
@@ -17,8 +18,9 @@ class AudioState {
     required this.list,
     required this.sortId,
     required this.isAsc,
-    this.currentSong,
     required this.isPlaying,
+    required this.showFloatingAudioWidget,
+    this.currentSong,
   });
   factory AudioState.empty() {
     return AudioState(
@@ -28,6 +30,7 @@ class AudioState {
       sortId: 0,
       isAsc: false,
       isPlaying: false,
+      showFloatingAudioWidget: false,
     );
   }
 
@@ -38,6 +41,7 @@ class AudioState {
     int? sortId,
     bool? isAsc,
     bool? isPlaying,
+    bool? showFloatingAudioWidget,
     MediaItem? currentSong,
   }) {
     return AudioState(
@@ -47,6 +51,8 @@ class AudioState {
       sortId: sortId ?? this.sortId,
       isAsc: isAsc ?? this.isAsc,
       isPlaying: isPlaying ?? this.isPlaying,
+      showFloatingAudioWidget:
+          showFloatingAudioWidget ?? this.showFloatingAudioWidget,
       currentSong: currentSong ?? this.currentSong,
     );
   }

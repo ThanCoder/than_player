@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,37 +31,8 @@ class AudioStateController {
         androidNotificationIcon: 'mipmap/launcher_icon',
       ),
     );
+
     _listenToAudioHandler();
-  }
-
-  void refershState() {
-    _controller.add(_state);
-  }
-
-  AudioFile? getAudioFileById(String id) {
-    final index = _state.list.indexWhere((e) => e.name == id);
-    if (index != -1) {
-      return state.list[index];
-    }
-    return null;
-  }
-
-  AudioFile? get currentAudioFile {
-    if (state.currentSong == null) return null;
-    final index = _state.list.indexWhere(
-      (e) => e.name == state.currentSong!.id,
-    );
-    if (index != -1) {
-      return state.list[index];
-    }
-    return null;
-  }
-
-  Future<String> get currentCoverPath async {
-    if (state.currentSong == null) return '';
-    final file = getAudioFileById(state.currentSong!.id);
-    if (file == null) return '';
-    return await file.meta.readImageCache(file.cacheName);
   }
 
   Future<void> scanAudioList() async {
@@ -89,18 +61,18 @@ class AudioStateController {
         _state = _state.copyWith(isPlaying: value.playing);
         _controller.add(_state);
       }
-      bool _isNextSongTriggered = false; // အပေါ်မှာ Flag တစ်ခု ကြေညာထားမယ်
+      bool isNextSongTriggered = false; // အပေါ်မှာ Flag တစ်ခု ကြေညာထားမယ်
 
       // listen ထဲမှာ ဒီလို စစ်ပါ
       if (value.processingState == AudioProcessingState.completed) {
-        if (!_isNextSongTriggered) {
+        if (!isNextSongTriggered) {
           _state = _state.copyWith(isPlaying: false);
           _controller.add(_state);
-          _isNextSongTriggered = true; // တစ်ခါဝင်ပြီးရင် ပိတ်လိုက်မယ်
+          isNextSongTriggered = true; // တစ်ခါဝင်ပြီးရင် ပိတ်လိုက်မယ်
           next(); //go next song
         }
       } else {
-        _isNextSongTriggered = false;
+        isNextSongTriggered = false;
       }
     });
 
@@ -111,7 +83,7 @@ class AudioStateController {
     });
   }
 
-  void playTrack(AudioFile file) {
+  Future<void> playTrack(AudioFile file) async {
     debugPrint('file.cachCoverPath: ${file.cachCoverPath}');
     final item = MediaItem(
       id: file.name,
@@ -119,7 +91,8 @@ class AudioStateController {
       duration: file.meta.duration,
       artUri: Uri.file(file.cachCoverPath),
     );
-    _audioHandler.playAudioFile(file.path, item);
+    _state = _state.copyWith(showFloatingAudioWidget: true);
+    await _audioHandler.playAudioFile(file.path, item);
   }
 
   void seek(Duration duration) {
@@ -141,6 +114,7 @@ class AudioStateController {
     if (index == -1) {
       return;
     }
+    if (index == 0) return;
     final file = state.list[index - 1];
     playTrack(file);
   }
@@ -154,5 +128,45 @@ class AudioStateController {
     }
     final file = state.list[index + 1];
     playTrack(file);
+  }
+
+  Future<void> disposePlayerServices() async {
+    await _audioHandler.stop();
+    await _audioHandler.player.dispose();
+  }
+
+  void refershState() {
+    _controller.add(_state);
+  }
+
+  void setVisiableFloatingAudioWidget(bool isVisiable) {
+    _state = _state.copyWith(showFloatingAudioWidget: isVisiable);
+    _controller.add(_state);
+  }
+
+  AudioFile? getAudioFileById(String id) {
+    final index = _state.list.indexWhere((e) => e.name == id);
+    if (index != -1) {
+      return state.list[index];
+    }
+    return null;
+  }
+
+  AudioFile? get currentAudioFile {
+    if (state.currentSong == null) return null;
+    final index = _state.list.indexWhere(
+      (e) => e.name == state.currentSong!.id,
+    );
+    if (index != -1) {
+      return state.list[index];
+    }
+    return null;
+  }
+
+  Future<String> get currentCoverPath async {
+    if (state.currentSong == null) return '';
+    final file = getAudioFileById(state.currentSong!.id);
+    if (file == null) return '';
+    return await file.meta.readImageCache(file.cacheName);
   }
 }

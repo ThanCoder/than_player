@@ -48,7 +48,6 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
         return Theme(
           data: ThemeData.dark(),
           child: Scaffold(
-            appBar: TPlatform.isDesktop ? AppBar() : null,
             body: Stack(
               children: [
                 Positioned.fill(child: coverWiget),
@@ -59,12 +58,31 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
                     ),
                   ),
                 ),
+
                 // content
                 Positioned.fill(
-                  top: 50,
+                  top: TPlatform.isDesktop ? 0 : 50,
                   left: 0,
                   right: 0,
                   child: SafeArea(child: contentWidget(state)),
+                ),
+                // background colors
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: TPlatform.isDesktop
+                      ? AppBar(
+                          backgroundColor: Colors.black.withValues(alpha: .1),
+                        )
+                      : SizedBox.shrink(),
+                ),
+                // controls
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: controlsWidget(state),
                 ),
               ],
             ),
@@ -94,6 +112,7 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
+        spacing: 5,
         children: [
           // 💡 ပြင်ဆင်ချက်: Content ထဲက ပုံကို Size အသေ ကန့်သတ်ပြီး Shadow လေး ထည့်ပေးမယ်
           Center(
@@ -116,63 +135,87 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
               ),
             ),
           ),
-          const SizedBox(height: 40),
+          // const SizedBox(height: 10),
 
           // သီချင်းခေါင်းစဉ်နှင့် အဆိုတော်အမည်
           marqueeWidget(currentAudioFile.meta.title ?? currentAudioFile.name),
-          const SizedBox(height: 8),
-          if (currentAudioFile.meta.artist != null)
-            Text(
-              currentAudioFile.meta.artist ?? 'Unknown Artist',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          if (currentAudioFile.meta.album != null)
-            Text(
-              currentAudioFile.meta.album ?? 'Unknown Album',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-            ),
+          // const SizedBox(height: 8),
+          // content scrollable
+          scrollableContent(state),
 
-          Spacer(),
-          controlsWidget(state),
-          AudioSeekerWidget(),
-          const SizedBox(height: 5),
-          menuWidget,
-          const SizedBox(height: 10),
+          // const SizedBox(height: 10),
         ],
       ),
     );
   }
 
+  Widget scrollableContent(AudioState state) {
+    final currentAudioFile = AudioStateController.instance.currentAudioFile!;
+    return SizedBox(
+      height: 50,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            if (currentAudioFile.meta.artist != null)
+              Text(
+                currentAudioFile.meta.artist ?? 'Unknown Artist',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            if (currentAudioFile.meta.album != null)
+              Text(
+                currentAudioFile.meta.album ?? 'Unknown Album',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // controls
   Widget controlsWidget(AudioState state) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 3,
+    final meta = AudioStateController().currentAudioFile!.meta;
+    return Column(
       children: [
-        IconButton(
-          onPressed: AudioStateController.instance.prev,
-          icon: Icon(Icons.skip_previous_rounded, size: 40),
+        Wrap(
+          alignment: .center,
+          crossAxisAlignment: .center,
+          spacing: 3,
+          children: [
+            IconButton(
+              onPressed: AudioStateController.instance.prev,
+              icon: Icon(Icons.skip_previous_rounded, size: 40),
+            ),
+            IconButton(
+              onPressed: AudioStateController.instance.togglePlay,
+              icon: Icon(
+                state.isPlaying
+                    ? Icons.pause_circle_outlined
+                    : Icons.play_circle_outline,
+                size: 70,
+              ),
+            ),
+            IconButton(
+              onPressed: AudioStateController.instance.next,
+              icon: Icon(Icons.skip_next, size: 40),
+            ),
+          ],
         ),
-        IconButton(
-          onPressed: AudioStateController.instance.togglePlay,
-          icon: Icon(
-            state.isPlaying
-                ? Icons.pause_circle_outlined
-                : Icons.play_circle_outline,
-            size: 70,
-          ),
+        AudioSeekerWidget(),
+        // audio info
+        Text(
+          '${meta.formatLabel} * ${meta.bitrateLabel} * ${meta.sampleRateLabel}',
         ),
-        IconButton(
-          onPressed: AudioStateController.instance.next,
-          icon: Icon(Icons.skip_next, size: 40),
-        ),
+        const SizedBox(height: 5),
+        menuWidget,
       ],
     );
   }

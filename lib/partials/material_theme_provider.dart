@@ -38,6 +38,10 @@ class _MaterialThemeProviderState extends State<MaterialThemeProvider>
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    MaterialThemeProvider.themeTypeNotifier.value =
+        MaterialThemeProviderType.fromName(
+          CFBStoreBase.getInstance.getString('app-theme'),
+        );
     super.initState();
   }
 
@@ -55,13 +59,13 @@ class _MaterialThemeProviderState extends State<MaterialThemeProvider>
     }
   }
 
-  ThemeData get currentTheme {
+  ThemeMode get currentThemeMode {
     final themeType = MaterialThemeProvider.themeTypeNotifier.value;
-    if (themeType == .system) {
-      final brightness = MediaQuery.of(context).platformBrightness;
-      return brightness == .dark ? ThemeData.dark() : ThemeData.light();
-    }
-    return themeType == .dark ? ThemeData.dark() : ThemeData.light();
+    return switch (themeType) {
+      .dark => .dark,
+      .light => .light,
+      _ => .system,
+    };
   }
 
   @override
@@ -71,7 +75,9 @@ class _MaterialThemeProviderState extends State<MaterialThemeProvider>
       builder: (context, value, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          darkTheme: currentTheme,
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: currentThemeMode,
           home: widget.child,
         );
       },

@@ -47,24 +47,7 @@ class AudioListItem extends StatelessWidget {
                     height: Platform.isAndroid ? 50 : 90,
                     child: stateWidget(state),
                   ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 3,
-                      children: [
-                        Text(
-                          file.name,
-                          maxLines: Platform.isAndroid ? 1 : 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        metaWidget,
-                      ],
-                    ),
-                  ),
+                  Expanded(child: metaWidget),
                 ],
               ),
             ),
@@ -77,12 +60,29 @@ class AudioListItem extends StatelessWidget {
   Widget get metaWidget {
     final meta = file.meta;
 
-    return Row(
+    return Column(
+      spacing: 2,
+      crossAxisAlignment: .start,
       children: [
-        if (meta.duration != null) Text(meta.formatDuration),
-        IconButton(onPressed: () {}, icon: Icon(Icons.favorite, size: 20)),
-        if (meta.artist != null)
-          Expanded(child: Text(' - ${meta.artist!}', maxLines: 1)),
+        Text(
+          file.name,
+          maxLines: Platform.isAndroid ? 1 : 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        ),
+        Row(
+          children: [
+            if (meta.duration != null) Text(meta.formatDuration),
+            IconButton(onPressed: () {}, icon: Icon(Icons.favorite, size: 20)),
+            if (meta.artist != null)
+              Expanded(child: Text(' - ${meta.artist!}', maxLines: 1)),
+          ],
+        ),
+        // audio info
+        if (meta.info != null)
+          Text(
+            '${meta.formatLabel} * ${meta.bitrateLabel} * ${meta.sampleRateLabel}',
+          ),
       ],
     );
   }

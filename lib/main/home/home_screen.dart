@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:than_player/main/home/audio/audio_home_screen.dart';
+import 'package:than_player/extensions/build_context_exts.dart';
+import 'package:than_player/main/home/audio/audio_content_page_one.dart';
+import 'package:than_player/main/home/audio/audio_home_page.dart';
+import 'package:than_player/main/home/audio/playing_audio_widget.dart';
 import 'package:than_player/main/home/more_page.dart';
 import 'package:than_player/main/home/video/video_home_page.dart';
 
@@ -11,16 +14,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final pages = [
-    AudioHomeScreen(),
-    VideoHomePage(),
-    MorePage(key: UniqueKey()),
-  ];
+  final pages = [AudioHomePage(), VideoHomePage(), MorePage(key: UniqueKey())];
   int index = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: index, children: pages),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: IndexedStack(index: index, children: pages),
+          ),
+          
+          Positioned(bottom: 0, left: 0, right: 0, child: playingWidget),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index,
         onTap: (value) => setState(() {
@@ -38,6 +45,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget get playingWidget {
+    return InkWell(
+      onTap: () {
+        context.push(builder: (mainContext) => AudioContentPageOne());
+      },
+      child: PlayingAudioWidget(),
     );
   }
 }

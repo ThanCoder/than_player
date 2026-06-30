@@ -15,9 +15,6 @@ void main() async {
     defaultImageAssetsPath: 'assets/images/logos/logo.png',
   );
 
-  // by default, windows and linux are enabled
-  JustAudioMediaKit.ensureInitialized();
-
   // or, if you want to manually configure enabled platforms instead:
   // make sure to include the required dependency in pubspec.yaml for
   // each enabled platform!
