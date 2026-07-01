@@ -2,8 +2,8 @@ enum VideoFolderType {
   allVideo,
   allFolders;
 
-  static VideoFolderType fromName(String name) {
-    if (name == allFolders.name) allFolders;
+  static VideoFolderType fromName(String type) {
+    if (type == allFolders.name) return allFolders;
     return allVideo;
   }
 }

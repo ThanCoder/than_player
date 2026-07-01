@@ -1,3 +1,4 @@
+import 'package:cfb_store/cfb_store.dart';
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
@@ -40,12 +41,17 @@ class _VideoHomePageState extends State<VideoHomePage> {
 
   Future<void> init() async {
     try {
+      folderType = VideoFolderType.fromName(
+        CFBStoreBase.getInstance.getString('video-folder-type'),
+      );
+
       if (!await ThanPkg.platform.isStoragePermissionGranted()) {
         await ThanPkg.platform.requestStoragePermission();
         return;
       }
       await VideoStateController.instance.scanList();
       isCalled = true;
+      setState(() {});
     } catch (e) {
       if (!mounted) return;
       showTMessageDialogError(context, e.toString());
@@ -98,44 +104,7 @@ class _VideoHomePageState extends State<VideoHomePage> {
   Widget get headerWidget {
     return Row(
       children: [
-        TextButton(
-          onPressed: () async {
-            await showMenu(
-              context: context,
-              positionBuilder: (context, constraints) => RelativeRect.fill,
-              items: [
-                PopupMenuItem(
-                  child: CheckboxListTile.adaptive(
-                    title: Text("All Videos"),
-                    value: folderType == .allVideo,
-                    onChanged: (value) {
-                      setState(() {
-                        folderType = .allVideo;
-                        context.pop();
-                      });
-                    },
-                  ),
-                ),
-                PopupMenuItem(
-                  enabled: true,
-                  child: CheckboxListTile.adaptive(
-                    title: Text("All Folders"),
-                    value: folderType == .allFolders,
-                    onChanged: (value) {
-                      setState(() {
-                        folderType = .allFolders;
-                      });
-                      context.pop();
-                    },
-                  ),
-                ),
-
-                // PopupMenuItem(child: Text("All Folder Tree")),
-              ],
-            );
-          },
-          child: Text(folderType.name.toCaptalize),
-        ),
+        videoFolderTypeWidget,
 
         Spacer(),
         if (TPlatform.isDesktop)
@@ -153,6 +122,56 @@ class _VideoHomePageState extends State<VideoHomePage> {
           },
         ),
       ],
+    );
+  }
+
+  Widget get videoFolderTypeWidget {
+    return TextButton(
+      onPressed: () async {
+        await showMenu(
+          context: context,
+          positionBuilder: (context, constraints) => RelativeRect.fill,
+          items: [
+            PopupMenuItem(
+              child: CheckboxListTile.adaptive(
+                title: Text("All Videos"),
+                value: folderType == .allVideo,
+                onChanged: (value) {
+                  folderType = .allVideo;
+                  setState(() {});
+
+                  CFBStoreBase.getInstance.put(
+                    'video-folder-type',
+                    folderType.name,
+                  );
+                  CFBStoreBase.getInstance.writeAll();
+                  context.pop();
+                },
+              ),
+            ),
+            PopupMenuItem(
+              enabled: true,
+              child: CheckboxListTile.adaptive(
+                title: Text("All Folders"),
+                value: folderType == .allFolders,
+                onChanged: (value) {
+                  folderType = .allFolders;
+                  setState(() {});
+                  CFBStoreBase.getInstance.put(
+                    'video-folder-type',
+                    folderType.name,
+                  );
+                  CFBStoreBase.getInstance.writeAll();
+                  context.pop();
+                },
+              ),
+            ),
+
+            // PopupMenuItem(child: Text("All Folder Tree")),
+          ],
+        );
+      },
+      child: Text(folderType.name.toCaptalize),
     );
   }
 
