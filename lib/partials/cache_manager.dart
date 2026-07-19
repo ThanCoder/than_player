@@ -46,7 +46,11 @@ class _CacheManagerListTileState extends State<CacheManagerListTile> {
       contentText: 'Cache: ရှင်းချင်ပါသလား?',
       submitText: 'Clean Cache',
       onSubmit: () async {
-        await Utils.instance.deleteFolder(Directory(widget.cacheDirPath));
+        final cacheDir = Directory(widget.cacheDirPath);
+        await Utils.instance.deleteFolder(cacheDir);
+        if (!cacheDir.existsSync()) {
+          cacheDir.createSync();
+        }
         if (!mounted) return;
         setState(() {});
       },
