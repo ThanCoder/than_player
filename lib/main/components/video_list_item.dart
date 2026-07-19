@@ -57,7 +57,7 @@ class VideoListItem extends StatelessWidget {
         pathList: [SrcDistType(src: file.path, dist: thumbnailFile.path)],
       ),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == .waiting) {
           return TLoader();
         }
         return TImage(source: thumbnailFile.path);
