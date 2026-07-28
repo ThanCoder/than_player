@@ -31,6 +31,7 @@ dependencies:
   crypto: ^3.0.7
   cfb_store:
     git: https://github.com/ThanCoder/cfb_store_dart.git
+  screen_brightness: ^2.1.11
 
 dev_dependencies:
   flutter_test:

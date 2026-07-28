@@ -26,6 +26,9 @@ class _VideoHomePageState extends State<VideoHomePage> {
   @override
   void initState() {
     super.initState();
+    if (widget.isCurrentPage && !isCalled) {
+      init();
+    }
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:cfb_store/cfb_store.dart';
 import 'package:flutter/material.dart';
 import 'package:than_player/extensions/build_context_exts.dart';
 import 'package:than_player/main/home/audio/audio_content_page_one.dart';
@@ -14,7 +15,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int index = 0;
+  int index = CFBStoreBase.getInstance.getInt('home_screen_index');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: IndexedStack(
               index: index,
               children: [
-                AudioHomePage(),
+                AudioHomePage(isCurrentPage: index == 0),
                 VideoHomePage(isCurrentPage: index == 1),
                 MorePage(key: UniqueKey()),
               ],
@@ -36,9 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index,
-        onTap: (value) => setState(() {
-          index = value;
-        }),
+        selectedItemColor: Colors.blue,
+        onTap: (value) {
+          setState(() {
+            index = value;
+          });
+          if (index == 2) return;
+          CFBStoreBase.getInstance.put('home_screen_index', index);
+          CFBStoreBase.getInstance.writeAll();
+        },
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.music_note), label: 'Music'),
           BottomNavigationBarItem(

@@ -9,10 +9,12 @@ import 'package:than_player/extensions/build_context_exts.dart';
 import 'package:than_player/main/components/audio_list_item.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
+import 'package:than_player/main/home/audio/audio_edit_cover_page.dart';
 import 'package:than_player/partials/sort_provider.dart';
 
 class AudioHomePage extends StatefulWidget {
-  const AudioHomePage({super.key});
+  final bool isCurrentPage;
+  const AudioHomePage({super.key, required this.isCurrentPage});
 
   @override
   State<AudioHomePage> createState() => _AudioHomePageState();
@@ -21,10 +23,21 @@ class AudioHomePage extends StatefulWidget {
 class _AudioHomePageState extends State<AudioHomePage> {
   @override
   void initState() {
-    init();
     super.initState();
+    if (widget.isCurrentPage && !isCalled) {
+      init();
+    }
   }
 
+  @override
+  void didUpdateWidget(covariant AudioHomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isCurrentPage && !isCalled) {
+      init();
+    }
+  }
+
+  bool isCalled = false;
   Future<void> init() async {
     try {
       if (!await ThanPkg.platform.isStoragePermissionGranted()) {
@@ -32,6 +45,8 @@ class _AudioHomePageState extends State<AudioHomePage> {
         return;
       }
       await AudioStateController.instance.scanAudioList();
+      isCalled = true;
+      setState(() {});
     } catch (e) {
       if (!mounted) return;
       showTMessageDialogError(context, e.toString());
@@ -41,7 +56,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: !TPlatform.isDesktop
+      appBar: Platform.isAndroid
           ? null
           : AppBar(
               title: Text('Audio Player'),
@@ -59,15 +74,17 @@ class _AudioHomePageState extends State<AudioHomePage> {
         builder: (context, snapshot) {
           final state = snapshot.data!;
 
-          return Stack(
-            children: [
-              Positioned.fill(child: backgroundCoverWidget),
-              Positioned.fill(
-                bottom: state.showFloatingAudioWidget ? 70 : 0,
-                child: listWidget,
-              ),
-              // Positioned(bottom: 0, left: 0, right: 0, child: playingWidget),
-            ],
+          return SafeArea(
+            child: Stack(
+              children: [
+                // Positioned.fill(child: backgroundCoverWidget),
+                Positioned.fill(
+                  bottom: state.showFloatingAudioWidget ? 70 : 0,
+                  child: listWidget,
+                ),
+                // Positioned(bottom: 0, left: 0, right: 0, child: playingWidget),
+              ],
+            ),
           );
         },
       ),
@@ -140,17 +157,17 @@ class _AudioHomePageState extends State<AudioHomePage> {
           Text('${state.list.length} Songs'),
           Spacer(),
           StreamBuilder(
-                  stream: AudioStateController().stateStream,
-                  builder: (context, asyncSnapshot) {
-                    return SortButton(
-                      value: AudioStateController().state.sortItem,
-                      list: AudioStateController().sortList,
-                      onApply: (item) {
-                        AudioStateController().setSort(item);
-                      },
-                    );
-                  },
-                ),
+            stream: AudioStateController().stateStream,
+            builder: (context, asyncSnapshot) {
+              return SortButton(
+                value: AudioStateController().state.sortItem,
+                list: AudioStateController().sortList,
+                onApply: (item) {
+                  AudioStateController().setSort(item);
+                },
+              );
+            },
+          ),
         ],
       ),
     );
@@ -162,6 +179,32 @@ class _AudioHomePageState extends State<AudioHomePage> {
       onClicked: (file) {
         AudioStateController.instance.playTrack(file);
       },
+      onMenuClicked: showAudioMenu,
+    );
+  }
+
+  void showAudioMenu(AudioFile file) {
+    showTMenuBottomSheet(
+      context,
+      children: [
+        ListTile(
+          title: Text('Edit Cover'),
+          onTap: () async {
+            context.pop();
+            await context.push(
+              builder: (mainContext) => AudioEditCoverPage(file: file),
+            );
+            setState(() {});
+          },
+        ),
+        ListTile(
+          title: Text('Open External'),
+          onTap: () {
+            context.pop();
+            ThanPkg.platform.launch(file.path);
+          },
+        ),
+      ],
     );
   }
 }

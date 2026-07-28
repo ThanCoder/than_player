@@ -18,17 +18,17 @@ class AudioContentPageOne extends StatefulWidget {
 class _AudioContentPageOneState extends State<AudioContentPageOne> {
   @override
   void initState() {
-    if (Platform.isAndroid) {
-      ThanPkg.platform.toggleFullScreen(isFullScreen: true);
-    }
+    // if (Platform.isAndroid) {
+    //   ThanPkg.platform.toggleFullScreen(isFullScreen: true);
+    // }
     super.initState();
   }
 
   @override
   void dispose() {
-    if (Platform.isAndroid) {
-      ThanPkg.platform.toggleFullScreen(isFullScreen: false);
-    }
+    // if (Platform.isAndroid) {
+    //   ThanPkg.platform.toggleFullScreen(isFullScreen: false);
+    // }
     super.dispose();
   }
 

@@ -35,7 +35,7 @@ class AudioListItem extends StatelessWidget {
                 state.currentSong != null && state.currentSong!.id == file.name
                 ? const Color.fromARGB(235, 18, 172, 159)
                 : context.brightness == .dark
-                ? Colors.black.withValues(alpha: .5)
+                ? Colors.black.withValues(alpha: .3)
                 : Colors.white.withValues(alpha: .7),
             child: Padding(
               padding: const EdgeInsets.all(4.0),
@@ -117,8 +117,12 @@ class AudioListItem extends StatelessWidget {
           return Center(child: TLoader());
         }
         final cachePath = snapshot.data!;
-        // print(cachePath);
-        return TImageFile(path: cachePath);
+        final cacheFile = File(cachePath);
+        if (cacheFile.existsSync()) {
+          return TImageFile(path: cachePath);
+        } else {
+          return Icon(Icons.image, size: 90);
+        }
       },
     );
   }
