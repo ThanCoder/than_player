@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:t_widgets/t_widgets.dart';
@@ -100,7 +98,7 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
         }
         final cachePath = snapshot.data!;
         // print(cachePath);
-        return TImageFile(path: cachePath);
+        return TImageFile(path: cachePath, fit: .fitHeight);
       },
     );
   }

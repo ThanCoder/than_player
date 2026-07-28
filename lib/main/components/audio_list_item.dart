@@ -121,7 +121,7 @@ class AudioListItem extends StatelessWidget {
         if (cacheFile.existsSync()) {
           return TImageFile(path: cachePath);
         } else {
-          return Icon(Icons.image, size: 90);
+          return Icon(Icons.image, size: Platform.isAndroid ? null : 90);
         }
       },
     );
