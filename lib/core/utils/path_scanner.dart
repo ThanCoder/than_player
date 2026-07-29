@@ -11,8 +11,10 @@ abstract class PathScanner<T> {
   @protected
   bool isExclude(FileSystemEntity entry, String name) =>
       name.startsWith('.') || name == 'Android';
-  @protected
-  T? isInclude(FileSystemEntity entry, String name);
+
+  bool isInclude(FileSystemEntity entry, String name);
+
+  Future<T?> processEntry(FileSystemEntity entry, String name);
 
   Future<List<T>> scan() async {
     final scanFolders = <String>[];
@@ -28,8 +30,10 @@ abstract class PathScanner<T> {
     if (Platform.isAndroid) {
       scanFolders.add(ThanPkg.android.app.getAppExternalPath());
     }
-    return await Isolate.run(() {
-      final list = <T>[];
+
+    final matchedEntries = await Isolate.run(() {
+      final rawList = <FileSystemEntity>[];
+
       for (var path in scanFolders) {
         final dirs = <Directory>[Directory(path)];
         while (dirs.isNotEmpty) {
@@ -43,24 +47,28 @@ abstract class PathScanner<T> {
               continue;
             }
 
-            if (entry.statSync().type == .file) {
-              final res = isInclude(
+            if (entry is File) {
+              if (isInclude(
                 entry,
                 FileSystemEntityCoreExtensions(entry).getName(),
-              );
-              if (res != null) {
-                list.add(res);
+              )) {
+                rawList.add(entry);
               }
-            }
-            if (entry.statSync().type == .directory) {
+            } else if (entry is Directory) {
               dirs.add(entry.directory);
             }
           }
         }
       }
-      return list;
+      return rawList;
     });
+
+    final res = await Future.wait(
+      matchedEntries.map((e) {
+        final name = FileSystemEntityCoreExtensions(e).getName();
+        return processEntry(e, name);
+      }),
+    );
+    return res.whereType<T>().toList();
   }
 }
-
-

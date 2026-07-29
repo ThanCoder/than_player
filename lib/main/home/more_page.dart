@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:t_widgets/t_widgets.dart';
+import 'package:t_widgets/t_widgets.dart' hide MaterialThemeProviderChooser;
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/core/utils/utils.dart';
-import 'package:than_player/partials/material_theme_provider.dart';
 import 'package:than_player/partials/cache_manager.dart';
+import 'package:than_player/partials/material_theme_provider.dart'
+    show MaterialThemeProviderChooser;
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});

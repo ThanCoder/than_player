@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:t_widgets/t_widgets.dart';
+import 'package:t_widgets/t_widgets.dart' hide SortButton;
 import 'package:than_pkg/than_pkg.dart' hide TPlatform;
 import 'package:than_player/core/state/all_audio/all_audio_state.dart';
 import 'package:than_player/core/state/all_audio/all_audio_state_controller.dart';

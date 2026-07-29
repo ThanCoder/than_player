@@ -1,17 +1,13 @@
-import 'package:cfb_store/cfb_store.dart';
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:t_widgets/t_widgets.dart';
+import 'package:t_widgets/t_widgets.dart' hide SortButton;
 import 'package:than_pkg/than_pkg.dart' hide TPlatform;
-import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/state/video/video_state.dart';
 import 'package:than_player/core/state/video/video_state_controller.dart';
-import 'package:than_player/extensions/build_context_exts.dart';
-import 'package:than_player/main/components/video_folder_list_item.dart';
-import 'package:than_player/main/components/video_list_item.dart';
-import 'package:than_player/main/home/video/types.dart';
-import 'package:than_player/main/home/video/video_content_screen.dart';
-import 'package:than_player/main/home/video/video_folder_list_page.dart';
+import 'package:than_player/main/home/video/video_folder_list_style_provider.dart';
+import 'package:than_player/main/home/video/video_list_style_provider.dart';
+import 'package:than_player/main/home/video_folder_type_provider.dart';
+import 'package:than_player/partials/list_style_provider.dart';
 import 'package:than_player/partials/sort_provider.dart';
 
 class VideoHomePage extends StatefulWidget {
@@ -40,14 +36,9 @@ class _VideoHomePageState extends State<VideoHomePage> {
   }
 
   bool isCalled = false;
-  VideoFolderType folderType = .allFolders;
 
   Future<void> init() async {
     try {
-      folderType = VideoFolderType.fromName(
-        CFBStore.getInstance.getString('video-folder-type'),
-      );
-
       if (!await ThanPkg.platform.isStoragePermissionGranted()) {
         await ThanPkg.platform.requestStoragePermission();
         return;
@@ -64,50 +55,40 @@ class _VideoHomePageState extends State<VideoHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Video Player'),
-      //   actions: [
-
-      //   ],
-      // ),
-      body: listWidget,
-    );
-  }
-
-  Widget get listWidget {
-    return StreamBuilder(
-      stream: VideoStateController.instance.stateStream,
-      initialData: VideoStateController.instance.state,
-      builder: (context, snapshot) {
-        final state = snapshot.data!;
-        if (state.isLoading) {
-          return Center(child: TLoaderRandom());
-        }
-        if (state.list.isEmpty) {
-          return Center(
-            child: RefreshButton(text: Text('Refersh'), onClicked: init),
-          );
-        }
-        return RefreshIndicator.adaptive(
-          onRefresh: init,
-          child: SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(child: headerWidget),
-                // list
-                styledList(state),
-              ],
+      body: StreamBuilder(
+        stream: VideoStateController.instance.stateStream,
+        initialData: VideoStateController.instance.state,
+        builder: (context, snapshot) {
+          final state = snapshot.data!;
+          if (state.isLoading) {
+            return Center(child: TLoaderRandom());
+          }
+          if (state.list.isEmpty) {
+            return Center(
+              child: RefreshButton(text: Text('Refersh'), onClicked: init),
+            );
+          }
+          return RefreshIndicator.adaptive(
+            onRefresh: init,
+            child: SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(child: headerWidget),
+                  // list
+                  bodyWidget(state),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   Widget get headerWidget {
     return Row(
       children: [
-        videoFolderTypeWidget,
+        VideoFolderTypeProvider(),
 
         Spacer(),
         if (TPlatform.isDesktop)
@@ -124,105 +105,19 @@ class _VideoHomePageState extends State<VideoHomePage> {
             );
           },
         ),
+        ListStyleProvider(),
       ],
     );
   }
 
-  Widget get videoFolderTypeWidget {
-    return TextButton(
-      onPressed: () async {
-        await showMenu(
-          context: context,
-          positionBuilder: (context, constraints) => RelativeRect.fill,
-          items: [
-            PopupMenuItem(
-              child: CheckboxListTile.adaptive(
-                title: Text("All Videos"),
-                value: folderType == .allVideo,
-                onChanged: (value) {
-                  folderType = .allVideo;
-                  setState(() {});
-
-                  CFBStore.getInstance.put(
-                    'video-folder-type',
-                    folderType.name,
-                  );
-                  CFBStore.getInstance.writeAll();
-                  context.pop();
-                },
-              ),
-            ),
-            PopupMenuItem(
-              enabled: true,
-              child: CheckboxListTile.adaptive(
-                title: Text("All Folders"),
-                value: folderType == .allFolders,
-                onChanged: (value) {
-                  folderType = .allFolders;
-                  setState(() {});
-                  CFBStore.getInstance.put(
-                    'video-folder-type',
-                    folderType.name,
-                  );
-                  CFBStore.getInstance.writeAll();
-                  context.pop();
-                },
-              ),
-            ),
-
-            // PopupMenuItem(child: Text("All Folder Tree")),
-          ],
-        );
-      },
-      child: Text(folderType.name.toCaptalize),
-    );
-  }
-
-  // list,grid,style
-  Widget styledList(VideoState state) {
-    if (folderType == .allFolders) {
-      return folderStyle(state);
-    }
-    return SliverList.builder(
-      itemCount: state.list.length,
-      itemBuilder: (context, index) => listItem(state.list[index]),
-    );
-  }
-
-  Widget folderStyle(VideoState state) {
-    final folders = <String, List<VideoFile>>{};
-    for (var file in state.list) {
-      folders.putIfAbsent(file.dirname, () => []).add(file);
-    }
-    final folderNames = folders.keys.toList();
-    return SliverList.builder(
-      itemCount: folderNames.length,
-      itemBuilder: (context, index) {
-        // final folder = folders[index];
-        final name = folderNames[index];
-        return VideoFolderListItem(
-          folderName: name,
-          files: folders[name] ?? [],
-          onClicked: (folderName, files) {
-            context.push(
-              builder: (mainContext) =>
-                  VideoFolderListPage(title: name, files: files),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget listItem(VideoFile file) {
-    return VideoListItem(
-      file: file,
-      onClicked: (file) async {
-        await context.push(
-          builder: (mainContext) => VideoContentScreen(file: file),
-        );
-        if (!mounted) return;
-        setState(() {});
+  Widget bodyWidget(VideoState state) {
+    return ValueListenableBuilder(
+      valueListenable: VideoFolderTypeProvider.valueNotifier,
+      builder: (context, value, child) {
+        if (value == .allFolders) {
+          return VideoFolderListStyleProvider(state: state);
+        }
+        return VideoListStyleProvider(list: state.list);
       },
     );
   }

@@ -28,13 +28,25 @@ class VideoListItem extends StatelessWidget {
         child: Row(
           spacing: 4,
           children: [
-            SizedBox(width: 100, height: 100, child: thumbnail),
+            SizedBox(
+              width: 100,
+              height: 100,
+              child: Stack(
+                children: [
+                  Positioned.fill(child: thumbnail),
+                  Positioned(bottom: 0, right: 0, child: durationWidget),
+                ],
+              ),
+            ),
             Expanded(
               child: Column(
                 spacing: 3,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(file.name),
+                  Text(
+                    file.name,
+                    style: TextStyle(fontSize: 10, fontWeight: .bold),
+                  ),
                   Text(IntSizeLabelExtension(file.size).toFileSizeLabel()),
                   Text(file.date.formatDateTimeAgo()),
                 ],
@@ -42,6 +54,20 @@ class VideoListItem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget get durationWidget {
+    return Container(
+      padding: EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: .5),
+        borderRadius: .circular(2),
+      ),
+      child: Text(
+        file.duration.toRemainingLabel(),
+        style: TextStyle(color: Colors.white, fontSize: 10),
       ),
     );
   }

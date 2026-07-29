@@ -1,26 +1,24 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
-import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:than_player/core/utils/utils.dart';
 
 class VideoFile {
+  final String id;
   final String name;
   final String path;
   final String dirname;
   final DateTime date;
   final int size;
+  final Duration duration;
   const VideoFile({
     required this.name,
     required this.path,
     required this.dirname,
     required this.date,
     required this.size,
+    required this.id, required this.duration,
   });
 
   String get cacheName {
-    final digest = md5.convert(utf8.encode(name.onlyName));
-    return '${digest.toString()}-video.png';
+    return '$id-video.png';
   }
 
   String get cachCoverPath {

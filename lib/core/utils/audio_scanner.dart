@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:dart_core_extensions/dart_core_extensions.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mime/mime.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/models/audio_meta.dart';
@@ -11,20 +12,31 @@ import 'package:than_player/core/utils/path_scanner.dart';
 
 class AudioScanner extends PathScanner<AudioFile> {
   @override
-  AudioFile? isInclude(FileSystemEntity entry, String name) {
+  bool isInclude(FileSystemEntity entry, String name) {
     // check size
     // 50 kb အောက် မထည့်ဘူး
-    if (entry.size < (1024 * 500)) return null;
+    if (entry.size < (1024 * 500)) return false;
 
     final mm = lookupMimeType(entry.path);
-    if (mm == null) return null;
+    if (mm == null) return false;
     if (mm.startsWith('audio')) {
       final meta = AudioMeta(entry.path);
       meta.openMeta();
       // 15s ထက်ကြီးရမယ်
       if (meta.duration != null && meta.duration!.inSeconds < 15) {
-        return null;
+        return false;
       }
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  Future<AudioFile?> processEntry(FileSystemEntity entry, String name) async {
+    try {
+      final meta = AudioMeta(entry.path);
+      meta.openMeta();
+
       return AudioFile(
         id: FileUtils.getFileIdSync(entry.path),
         name: name,
@@ -34,7 +46,9 @@ class AudioScanner extends PathScanner<AudioFile> {
         meta: meta,
         size: entry.size,
       );
+    } catch (e) {
+      debugPrint('[AudioScanner:processEntry]: $e');
+      return null;
     }
-    return null;
   }
 }

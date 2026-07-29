@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cfb_store/cfb_store.dart';
 import 'package:than_player/core/models/video_file.dart';
+import 'package:than_player/core/services/video_file_services.dart';
 import 'package:than_player/core/state/video/video_state.dart';
 import 'package:than_player/core/utils/video_scanner.dart';
 import 'package:than_player/partials/sort_provider.dart';
@@ -21,7 +22,7 @@ class VideoStateController {
     SortItem.sizeSortItem,
   ];
 
-  Future<void> init() async {}
+  //********************Scan Video Files******************** */
   Future<void> scanList() async {
     try {
       //**************Sort****************** */
@@ -58,6 +59,7 @@ class VideoStateController {
     }
   }
 
+  //********************Sort******************** */
   void sort() {
     if (_state.sortItem.id == SortItem.nameSortItem.id) {
       _state.list.sortName(isA2Z: _state.sortItem.isTrue);
@@ -76,5 +78,43 @@ class VideoStateController {
     _state = _state.copyWith(sortItem: item);
     sort();
     _controller.add(_state);
+  }
+
+  //********************Video File Services******************** */
+  final VideoFileServices _fileService = VideoFileServices.instance;
+
+  Future<void> deleteVideo(VideoFile file) async {
+    final isSuccess = await _fileService.deleteVideo(file);
+
+    if (isSuccess) {
+      // Memory ထဲက List ထဲမှ ဖယ်ထုတ်ပြီး State အသစ်တင်ပေးခြင်း
+      final updatedList = List<VideoFile>.from(_state.list)
+        ..removeWhere((e) => e.id == file.id);
+
+      _state = _state.copyWith(list: updatedList);
+      _controller.add(_state);
+    } else {
+      _state = _state.copyWith(error: 'Failed to delete file');
+      _controller.add(_state);
+    }
+  }
+
+  Future<void> renameVideo(VideoFile file, String newName) async {
+    final updatedVideo = await _fileService.renameVideo(file, newName);
+
+    if (updatedVideo != null) {
+      final index = _state.list.indexWhere((e) => e.id == file.id);
+      if (index != -1) {
+        final updatedList = List<VideoFile>.from(_state.list);
+        updatedList[index] = updatedVideo;
+
+        _state = _state.copyWith(list: updatedList);
+        sort(); // Sort ပြန်စီပေးရန် (လိုအပ်ပါက)
+        _controller.add(_state);
+      }
+    } else {
+      _state = _state.copyWith(error: 'Failed to rename file');
+      _controller.add(_state);
+    }
   }
 }
