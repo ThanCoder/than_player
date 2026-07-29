@@ -33,7 +33,7 @@ class _VideoListStyleProviderState extends State<VideoListStyleProvider> {
     return SliverGrid.builder(
       itemCount: widget.list.length,
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 180,
+        maxCrossAxisExtent: 200,
         mainAxisExtent: 150,
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,

@@ -20,12 +20,6 @@ class AudioScanner extends PathScanner<AudioFile> {
     final mm = lookupMimeType(entry.path);
     if (mm == null) return false;
     if (mm.startsWith('audio')) {
-      final meta = AudioMeta(entry.path);
-      meta.openMeta();
-      // 15s ထက်ကြီးရမယ်
-      if (meta.duration != null && meta.duration!.inSeconds < 15) {
-        return false;
-      }
       return true;
     }
     return false;
@@ -38,7 +32,7 @@ class AudioScanner extends PathScanner<AudioFile> {
       meta.openMeta();
 
       return AudioFile(
-        id: FileUtils.getFileIdSync(entry.path),
+        id: await FileUtils.getFileId(entry.path),
         name: name,
         path: entry.path,
         dirname: entry.parent.onlyName,

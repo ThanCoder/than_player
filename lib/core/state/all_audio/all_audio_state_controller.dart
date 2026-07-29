@@ -21,10 +21,9 @@ class AllAudioStateController {
     SortItem.dateSortItem,
     SortItem.sizeSortItem,
   ];
-
+  final _scanner = AudioScanner();
   Future<void> scanAudioListFromStorage() async {
     try {
-      //**************Sort****************** */
       SortItem sortItem = sortList[1];
       final recentSortId = CFBStore.getInstance.getInt(
         'audio-file-sort-id',
@@ -42,7 +41,7 @@ class AllAudioStateController {
       _state = _state.copyWith(isLoading: true, list: [], sortItem: sortItem);
       _controller.add(_state);
 
-      final list = await AudioScanner().scan();
+      final list = await _scanner.scan();
       _state = _state.copyWith(isLoading: false, list: list);
       sort();
       _controller.add(_state);
@@ -52,6 +51,7 @@ class AllAudioStateController {
     }
   }
 
+  //**************Sort****************** */
   void sort() {
     if (_state.sortItem.id == SortItem.nameSortItem.id) {
       _state.list.sortName(isA2Z: _state.sortItem.isTrue);
