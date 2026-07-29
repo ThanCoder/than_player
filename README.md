@@ -1,3 +1,3 @@
 # Than Player
 
-### Audio,Video Playe
+### Audio,Video Player
