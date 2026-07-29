@@ -21,7 +21,6 @@ class AudioListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // print('current: ${AudioStateController.instance.isCurrentSong(file.id)}');
     return StreamBuilder(
       stream: AudioStateController().stateStream,
       initialData: AudioStateController().state,
@@ -32,25 +31,29 @@ class AudioListItem extends StatelessWidget {
           onTap: () => onClicked?.call(file),
           onLongPress: () => onMenuClicked?.call(file),
           onSecondaryTap: () => onMenuClicked?.call(file),
-          child: Card(
-            color: itemBackgroundColor(context, file),
-            child: ClipRRect(
-              borderRadius: .circular(12),
-              child: BackdropFilter(
-                filter: .blur(sigmaX: 10, sigmaY: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Row(
-                    spacing: 4,
-                    children: [
-                      SizedBox(
-                        width: Platform.isAndroid ? 40 : 60,
-                        height: Platform.isAndroid ? 40 : 60,
-                        child: stateWidget(state),
-                      ),
-                      Expanded(child: metaWidget),
-                    ],
-                  ),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: itemBackgroundColor(context, file),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Row(
+                  spacing: 4,
+                  children: [
+                    SizedBox(
+                      width: Platform.isAndroid ? 50 : 60,
+                      height: Platform.isAndroid ? 50 : 60,
+                      child: stateWidget(state),
+                    ),
+                    Expanded(child: metaWidget),
+                  ],
                 ),
               ),
             ),

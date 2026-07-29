@@ -99,6 +99,10 @@ class AudioStateController {
     }
   }
 
+  Future<void> pause() async {
+    await _audioHandler.pause();
+  }
+
   bool existsByIndex(int index) {
     return index >= 0 && index < _state.list.length;
   }
@@ -166,6 +170,13 @@ class AudioStateController {
       return state.list[index];
     }
     return null;
+  }
+
+  String? get currentCoverCachePath {
+    if (state.currentSong == null) return '';
+    final file = getAudioFileById(state.currentSong!.id);
+    if (file == null) return null;
+    return file.cachCoverPath;
   }
 
   Future<String> get currentCoverPath async {

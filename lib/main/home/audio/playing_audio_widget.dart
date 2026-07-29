@@ -17,7 +17,7 @@ class PlayingAudioWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: .circular(15),
       child: BackdropFilter(
-        filter: .blur(sigmaX: 10, sigmaY: 10),
+        filter: .blur(sigmaX: 3, sigmaY: 3),
         child: StreamBuilder(
           stream: AudioStateController().stateStream,
           initialData: AudioStateController().state,

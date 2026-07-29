@@ -6,6 +6,7 @@ import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart' hide TPlatform;
 import 'package:than_player/core/state/all_audio/all_audio_state.dart';
 import 'package:than_player/core/state/all_audio/all_audio_state_controller.dart';
+import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/extensions/build_context_exts.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/main/components/audio_sliver_list.dart';
@@ -80,7 +81,17 @@ class _AudioHomePageState extends State<AudioHomePage> {
           return SafeArea(
             child: Stack(
               children: [
-                Positioned.fill(child: backgroundCoverWidget),
+                Positioned.fill(child: backgroundCoverWidget(state)),
+                if (state.currentSong != null ||
+                    AudioStateController.instance.currentCoverCachePath != null)
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: .blur(sigmaX: 6, sigmaY: 6),
+                      child: Container(
+                        color: Colors.black.withValues(alpha: .2),
+                      ),
+                    ),
+                  ),
                 Positioned.fill(
                   bottom: state.showFloatingAudioWidget ? 70 : 0,
                   child: listWidget,
@@ -93,33 +104,21 @@ class _AudioHomePageState extends State<AudioHomePage> {
     );
   }
 
-  Widget get backgroundCoverWidget {
-    return ClipRRect(
-      borderRadius: .circular(10),
-      child: BackdropFilter(
-        filter: .blur(sigmaX: 10, sigmaY: 10),
-        child: StreamBuilder(
-          stream: AudioStateController.instance.stateStream,
-          builder: (context, asyncSnapshot) {
-            return FutureBuilder(
-              future: AudioStateController().currentCoverPath,
-              builder: (context, snapshot) {
-                final coverFile = File(snapshot.data ?? '');
-                if (!coverFile.existsSync()) {
-                  return SizedBox.fromSize();
-                }
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: .4),
-                  ),
+  Widget backgroundCoverWidget(AudioState state) {
+    if (state.currentSong == null ||
+        AudioStateController.instance.currentCoverCachePath == null) {
+      return SizedBox.shrink();
+    }
+    final coverFile = File(
+      AudioStateController.instance.currentCoverCachePath!,
+    );
+    if (!coverFile.existsSync()) {
+      return SizedBox.shrink();
+    }
+    return Container(
+      decoration: BoxDecoration(color: Colors.black.withValues(alpha: .4)),
 
-                  child: TImageFile(path: snapshot.data ?? ''),
-                );
-              },
-            );
-          },
-        ),
-      ),
+      child: TImageFile(path: coverFile.path),
     );
   }
 
@@ -137,20 +136,18 @@ class _AudioHomePageState extends State<AudioHomePage> {
         }
         return RefreshIndicator.adaptive(
           onRefresh: init,
-          child: SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(child: headerWidget(state)),
-                // list
-                AudioSliverList(
-                  list: state.list,
-                  onClicked: (file) {
-                    AudioStateController.instance.setAudioList(state.list);
-                    AudioStateController.instance.playTrack(file);
-                  },
-                ),
-              ],
-            ),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: headerWidget(state)),
+              // list
+              AudioSliverList(
+                list: state.list,
+                onClicked: (file) {
+                  AudioStateController.instance.setAudioList(state.list);
+                  AudioStateController.instance.playTrack(file);
+                },
+              ),
+            ],
           ),
         );
       },
@@ -162,7 +159,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
       padding: const EdgeInsets.all(8.0),
       color: context.brightness == .dark
           ? const Color.fromARGB(255, 31, 31, 31)
-          : Colors.white,
+          : const Color.fromARGB(157, 255, 255, 255),
       child: Row(
         children: [
           Text('${state.list.length} Songs'),

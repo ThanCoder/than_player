@@ -7,6 +7,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart';
 import 'package:than_player/core/models/video_file.dart';
+import 'package:than_player/core/state/audio/audio_state_controller.dart';
 
 class VideoContentScreen extends StatefulWidget {
   final VideoFile file;
@@ -36,6 +37,9 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
 
   Future<void> init() async {
     try {
+      // stop audio
+      await AudioStateController.instance.pause();
+
       await player.open(Media(widget.file.path));
 
       late StreamSubscription<VideoParams> videoParamsSub;
