@@ -14,7 +14,8 @@ class VideoFile {
     required this.dirname,
     required this.date,
     required this.size,
-    required this.id, required this.duration,
+    required this.id,
+    required this.duration,
   });
 
   String get cacheName {

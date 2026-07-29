@@ -19,6 +19,7 @@ void showVideoContextItemMenu(BuildContext context, VideoFile file) {
             context,
             text: file.name.onlyName,
             isSelectAll: true,
+            autofocus: true,
             submitText: 'Rename',
             onSubmit: (text) {
               final newName = '$text.${file.name.extName}';

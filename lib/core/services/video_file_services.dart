@@ -34,15 +34,14 @@ class VideoFileServices {
       if (!await videoIoFile.exists()) return null;
 
       final directory = videoIoFile.parent.path;
-      final extension = file.path.split('.').last;
-      final newPath = '$directory/$newName.$extension';
+      final newPath = '$directory/$newName.';
 
       final renamedFile = await videoIoFile.rename(newPath);
 
       // Model အသစ်ပြန်ထုတ်ပေးခြင်း
       return VideoFile(
         id: file.id,
-        name: '$newName.$extension',
+        name: newName,
         path: renamedFile.path,
         dirname: file.dirname,
         date: file.date,
