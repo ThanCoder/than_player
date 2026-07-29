@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:dart_core_extensions/dart_core_extensions.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/models/audio_meta.dart';
@@ -14,20 +14,17 @@ import 'package:than_player/core/utils/platform_utils.dart';
 class AudioScanner {
   Future<List<AudioFile>> scan() async {
     final roots = await PlatformUtils.getScanRootPath();
+
     return await Isolate.run(() {
       List<AudioFile> list = [];
 
       AudioFile? processEntry(FileSystemEntity entry, String name) {
         try {
-          // check size
-          // 50 kb အောက် မထည့်ဘူး
+          // 500 KB အောက် မထည့်ဘူး (1024 * 500)
           if (entry.size < (1024 * 500)) return null;
 
           final mm = lookupMimeType(entry.path);
-          if (mm == null) return null;
-          if (!mm.startsWith('audio')) {
-            return null;
-          }
+          if (mm == null || !mm.startsWith('audio')) return null;
 
           final meta = AudioMeta(entry.path);
           meta.openMeta();
@@ -49,19 +46,33 @@ class AudioScanner {
 
       for (var path in roots) {
         final dirs = <Directory>[Directory(path)];
+
         while (dirs.isNotEmpty) {
           final currentDir = dirs.removeLast();
-          if (!currentDir.existsSync()) continue;
 
-          for (var entry in currentDir.listSync(followLinks: false)) {
-            if (entry is File) {
+          try {
+            if (!currentDir.existsSync()) continue;
+
+            // listSync မှာ error တက်နိုင်တာမို့ try-catch ထဲထည့်ပါမည်
+            final entries = currentDir.listSync(followLinks: false);
+
+            for (var entry in entries) {
               final name = entry.getName();
+
+              // Hidden files သို့မဟုတ် Android System folder များကို ကျော်မည်
               if (name.startsWith('.') || name.startsWith('Android')) continue;
-              final audio = processEntry(entry, name);
-              if (audio == null) continue;
-              list.add(audio);
-            } else if (entry is Directory) {}
-            dirs.add(entry.directory);
+
+              if (entry is File) {
+                final audio = processEntry(entry, name);
+                if (audio != null) list.add(audio);
+              } else if (entry is Directory) {
+                // Directory ဖြစ်မှသာ Sub-directory စာရင်းထဲပေါင်းမည်
+                dirs.add(entry);
+              }
+            }
+          } catch (e) {
+            // Android storage permission ကြောင့် ဖတ်မရတဲ့ folder များကို skip လုပ်မည်
+            debugPrint('[AudioScanner:listSync Exception]: $e');
           }
         }
       }

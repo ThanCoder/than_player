@@ -185,7 +185,6 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
 
   // controls
   Widget controlsWidget(AudioState state) {
-    print(AudioStateController.instance.currentSongIndex);
     final meta = AudioStateController().currentAudioFile!.meta;
     return Column(
       children: [

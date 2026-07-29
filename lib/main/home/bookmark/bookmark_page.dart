@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/audio_bookmark/audio_bookmark_view_button.dart';
-
+import 'package:than_player/video_bookmark/video_bookmark_view_button.dart';
 
 class BookmarkPage extends StatefulWidget {
   final bool isCurrentPage;
@@ -54,10 +54,10 @@ class _BookmarkPageState extends State<BookmarkPage> {
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 200,
               mainAxisExtent: 50,
+              mainAxisSpacing: 5,
+              crossAxisSpacing: 5,
             ),
-            children: [
-              AudioBookmarkViewButton(),
-            ],
+            children: [AudioBookmarkViewButton(), VideoBookmarkViewButton()],
           ),
         ],
       ),

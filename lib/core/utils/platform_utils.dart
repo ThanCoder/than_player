@@ -7,6 +7,30 @@ import 'package:than_pkg/than_pkg.dart';
 import 'package:than_pkg_android/than_pkg_android.dart';
 
 class PlatformUtils {
+  static Future<bool> genVideoThumbnail(
+    String path,
+    String outPath, {
+    int width = 0,
+    int height = 0,
+    Duration time = const Duration(seconds: 1),
+  }) async {
+    if (Platform.isAndroid) {
+      await ThanPkgAndroid.getInstance.videoHandler.saveThumbnail(
+        path,
+        outPath,
+        width: width,
+        height: height,
+        time: time,
+      );
+      return true;
+    }
+
+    await ThanPkg.platform.genVideoThumbnail(
+      pathList: [SrcDistType(src: path, dist: outPath)],
+    );
+    return true;
+  }
+
   static Future<List<String>> getScanRootPath() async {
     final scanFolders = <String>[];
     if (Platform.isLinux) {

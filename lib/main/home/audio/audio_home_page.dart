@@ -158,7 +158,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
     return Container(
       padding: const EdgeInsets.all(8.0),
       color: context.brightness == .dark
-          ? const Color.fromARGB(255, 31, 31, 31)
+          ? const Color.fromARGB(157, 31, 31, 31)
           : const Color.fromARGB(157, 255, 255, 255),
       child: Row(
         children: [

@@ -5,9 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart';
 import 'package:than_player/core/models/video_file.dart';
+import 'package:than_player/core/utils/platform_utils.dart';
+import 'package:than_player/core/utils/utils.dart';
+import 'package:than_player/video_bookmark/video_bookmark_button.dart';
+import 'package:than_player/video_config/video_config.dart';
 
 class VideoListItem extends StatelessWidget {
   final VideoFile file;
+  final VideoConfig? config;
   final void Function(VideoFile file)? onClicked;
   final void Function(VideoFile file)? onMenuClicked;
   const VideoListItem({
@@ -15,6 +20,7 @@ class VideoListItem extends StatelessWidget {
     required this.file,
     this.onClicked,
     this.onMenuClicked,
+    required this.config,
   });
 
   @override
@@ -34,7 +40,25 @@ class VideoListItem extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(child: thumbnail),
-                  Positioned(bottom: 0, right: 0, child: durationWidget),
+                  Positioned(
+                    bottom: config == null ? 0 : 10,
+                    right: 0,
+                    child: durationWidget,
+                  ),
+                  if (config != null &&
+                      config!.duration != .zero &&
+                      config!.current != .zero)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: positionProgressWiget(config!),
+                    ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: VideoBookmarkButton(file: file),
+                  ),
                 ],
               ),
             ),
@@ -45,10 +69,16 @@ class VideoListItem extends StatelessWidget {
                 children: [
                   Text(
                     file.name,
+                    maxLines: 2,
                     style: TextStyle(fontSize: 10, fontWeight: .bold),
                   ),
                   Text(IntSizeLabelExtension(file.size).toFileSizeLabel()),
                   Text(file.date.formatDateTimeAgo()),
+                  if (config != null && config!.current != .zero)
+                    Text(
+                      '${config!.current.formatTimeLable()}/${config!.duration.formatTimeLable()}',
+                      style: TextStyle(fontSize: 10, color: Colors.blue),
+                    ),
                 ],
               ),
             ),
@@ -58,7 +88,16 @@ class VideoListItem extends StatelessWidget {
     );
   }
 
+  Widget positionProgressWiget(VideoConfig config) {
+    return LinearProgressIndicator(
+      value: config.current.inMilliseconds / config.duration.inMilliseconds,
+    );
+  }
+
   Widget get durationWidget {
+    if (config == null || config!.duration == .zero) {
+      return SizedBox.shrink();
+    }
     return Container(
       padding: EdgeInsets.all(1),
       decoration: BoxDecoration(
@@ -66,7 +105,7 @@ class VideoListItem extends StatelessWidget {
         borderRadius: .circular(2),
       ),
       child: Text(
-        file.duration.toRemainingLabel(),
+        config!.duration.toRemainingLabel(),
         style: TextStyle(color: Colors.white, fontSize: 10),
       ),
     );
@@ -74,13 +113,14 @@ class VideoListItem extends StatelessWidget {
 
   Widget get thumbnail {
     final thumbnailFile = File(file.cachCoverPath);
-    // print(thumbnailFile);
 
     if (thumbnailFile.existsSync()) return TImage(source: thumbnailFile.path);
     return FutureBuilder(
-      // future: VideoUtils.genVideoThumbnail(file.path, thumbnailFile),
-      future: ThanPkg.platform.genVideoThumbnail(
-        pathList: [SrcDistType(src: file.path, dist: thumbnailFile.path)],
+      future: PlatformUtils.genVideoThumbnail(
+        file.path,
+        thumbnailFile.path,
+        width: 400,
+        height: 400,
       ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == .waiting) {

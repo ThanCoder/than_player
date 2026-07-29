@@ -46,7 +46,6 @@ class VideoFileServices {
         dirname: file.dirname,
         date: file.date,
         size: file.size,
-        duration: file.duration,
       );
     } catch (e) {
       return null;

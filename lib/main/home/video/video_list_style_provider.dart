@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/main/components/video_grid_item.dart';
-import 'package:than_player/extensions/build_context_exts.dart';
 import 'package:than_player/main/components/video_list_item.dart';
-import 'package:than_player/main/home/video/video_content_screen.dart';
-import 'package:than_player/main/home/video/video_context_menu_func.dart';
+import 'package:than_player/main/home/video/video_func.dart';
 import 'package:than_player/partials/list_style_provider.dart';
+import 'package:than_player/video_config/video_config_services.dart';
 
 class VideoListStyleProvider extends StatefulWidget {
   final List<VideoFile> list;
@@ -40,10 +39,16 @@ class _VideoListStyleProviderState extends State<VideoListStyleProvider> {
       ),
       itemBuilder: (context, index) {
         final file = widget.list[index];
-        return VideoGridItem(
-          file: file,
-          onMenuClicked: (file) => showVideoContextItemMenu(context, file),
-          onClicked: onClickedItem,
+        return FutureBuilder(
+          future: VideoConfigServices.instance.getConfig(file.id, file.path),
+          builder: (context, snapshot) {
+            return VideoGridItem(
+              file: file,
+              config: snapshot.data,
+              onMenuClicked: (file) => showVideoContextItemMenu(context, file),
+              onClicked: onClickedItem,
+            );
+          },
         );
       },
     );
@@ -54,19 +59,23 @@ class _VideoListStyleProviderState extends State<VideoListStyleProvider> {
       itemCount: widget.list.length,
       itemBuilder: (context, index) {
         final file = widget.list[index];
-        return VideoListItem(
-          file: file,
-          onClicked: onClickedItem,
-          onMenuClicked: (file) => showVideoContextItemMenu(context, file),
+        return FutureBuilder(
+          future: VideoConfigServices.instance.getConfig(file.id, file.path),
+          builder: (context, snapshot) {
+            return VideoListItem(
+              file: file,
+              config: snapshot.data,
+              onClicked: onClickedItem,
+              onMenuClicked: (file) => showVideoContextItemMenu(context, file),
+            );
+          },
         );
       },
     );
   }
 
   void onClickedItem(VideoFile file) async {
-    await context.push(
-      builder: (mainContext) => VideoContentScreen(file: file),
-    );
+    await goVideoContentScreen(context, file);
     if (!mounted) return;
     setState(() {});
   }

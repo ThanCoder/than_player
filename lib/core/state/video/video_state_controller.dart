@@ -23,6 +23,7 @@ class VideoStateController {
   ];
 
   //********************Scan Video Files******************** */
+  final _scanner = VideoScanner();
   Future<void> scanList() async {
     try {
       //**************Sort****************** */
@@ -49,7 +50,7 @@ class VideoStateController {
       _controller.add(_state);
       //**************Sort End****************** */
 
-      final list = await VideoScanner().scan();
+      final list = await _scanner.scan();
       _state = _state.copyWith(isLoading: false, list: list);
       sort();
       _controller.add(_state);

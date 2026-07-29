@@ -43,7 +43,9 @@ class ListStyleProvider extends StatefulWidget {
 class _ListStyleProviderState extends State<ListStyleProvider> {
   @override
   void initState() {
-    ListStyleProvider.init();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ListStyleProvider.init();
+    });
     super.initState();
   }
 

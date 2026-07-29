@@ -23,29 +23,21 @@ class VideoScanner {
 
   Future<List<VideoFile>> scan() async {
     final roots = await PlatformUtils.getScanRootPath();
-    return await Isolate.run(() async {
+
+    return await Isolate.run(() {
       List<VideoFile> list = [];
 
-      Future<VideoFile?> processEntry(
-        FileSystemEntity entry,
-        String name,
-      ) async {
+      VideoFile? processEntry(FileSystemEntity entry, String name) {
         try {
           final size = entry.file.lengthSync();
           // 1mb အောက် မလိုဘူး
           if (size < 1024 * 1024) return null;
-
-          final ext = name.extName.toLowerCase();
-          if (!videoExtensions.contains(ext)) {
-            return null;
-          }
 
           final mm = lookupMimeType(entry.path);
           if (mm == null) return null;
           if (!mm.startsWith('video')) {
             return null;
           }
-          final dur = await PlatformUtils.getDuration(entry.path);
           return VideoFile(
             id: FileUtils.getFileIdSync(entry.path),
             name: name,
@@ -53,10 +45,9 @@ class VideoScanner {
             dirname: entry.parent.onlyName,
             date: entry.modifiedDate,
             size: entry.size,
-            duration: dur,
           );
         } catch (e) {
-          debugPrint('[VideoScanner:processEntry]: $e');
+          debugPrint('Dev: [VideoScanner:processEntry]: $e');
           return null;
         }
       }
@@ -66,16 +57,25 @@ class VideoScanner {
         while (dirs.isNotEmpty) {
           final currentDir = dirs.removeLast();
           if (!currentDir.existsSync()) continue;
-          for (var entry in currentDir.listSync(followLinks: false)) {
-            if (entry is File) {
-              final name = entry.getName();
-              if (name.startsWith('.') || name.startsWith('Android')) continue;
-              final video = await processEntry(entry, name);
-              if (video == null) continue;
-              list.add(video);
-            } else if (entry is Directory) {
-              dirs.add(entry.directory);
+
+          try {
+            final entries = currentDir.listSync(followLinks: false);
+
+            for (var entry in entries) {
+              if (entry is File) {
+                final name = entry.getName();
+                if (name.startsWith('.') || name.startsWith('Android')) {
+                  continue;
+                }
+                final video = processEntry(entry, name);
+                if (video == null) continue;
+                list.add(video);
+              } else if (entry is Directory) {
+                dirs.add(entry.directory);
+              }
             }
+          } catch (e) {
+            debugPrint('[VideoScanner:scan]: $e');
           }
         }
       }

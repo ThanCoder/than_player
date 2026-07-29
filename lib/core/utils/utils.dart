@@ -74,8 +74,15 @@ class Utils {
 
 extension FormatTime on Duration {
   String formatTimeLable() {
-    final mins = inMinutes.toString().padLeft(2, '0');
+    final hours = inHours.toString().padLeft(2, '0');
+    final mins = (inMinutes % 60).toString().padLeft(2, '0');
     final secs = (inSeconds % 60).toString().padLeft(2, '0');
+
+    // ၁ နာရီ သို့မဟုတ် အထက်ရှိမှ Hour ကို ရှေ့က ထည့်ပြမည်
+    if (inHours > 0) {
+      return '$hours:$mins:$secs';
+    }
+
     return '$mins:$secs';
   }
 }

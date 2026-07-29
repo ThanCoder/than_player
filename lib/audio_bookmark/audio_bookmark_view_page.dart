@@ -40,11 +40,6 @@ class _AudioBookmarkViewPageState extends State<AudioBookmarkViewPage> {
                     StreamBuilder(
                       stream: AllAudioStateController().stateStream,
                       builder: (context, snapshot) {
-                        // if (snapshot.connectionState == .waiting) {
-                        //   return SliverFillRemaining(
-                        //     child: Center(child: TLoaderRandom()),
-                        //   );
-                        // }
                         return StreamBuilder(
                           stream: AudioBookmarkController().stream,
                           builder: (context, asyncSnapshot) {

@@ -3,16 +3,21 @@ import 'dart:io';
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
-import 'package:than_pkg/than_pkg.dart';
 import 'package:than_player/core/models/video_file.dart';
+import 'package:than_player/core/utils/platform_utils.dart';
+import 'package:than_player/core/utils/utils.dart';
+import 'package:than_player/video_bookmark/video_bookmark_button.dart';
+import 'package:than_player/video_config/video_config.dart';
 
 class VideoGridItem extends StatelessWidget {
   final VideoFile file;
+  final VideoConfig? config;
   final void Function(VideoFile file)? onClicked;
   final void Function(VideoFile file)? onMenuClicked;
   const VideoGridItem({
     super.key,
     required this.file,
+    this.config,
     this.onClicked,
     this.onMenuClicked,
   });
@@ -35,7 +40,26 @@ class VideoGridItem extends StatelessWidget {
                 child: Stack(
                   children: [
                     Positioned.fill(child: thumbnailWidget),
-                    Positioned(bottom: 0, right: 0, child: durationWidget),
+                    if (config != null && config!.duration != .zero)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        child: durationWidget(config!.duration),
+                      ),
+                    if (config != null &&
+                        config!.duration != .zero &&
+                        config!.current != .zero)
+                      Positioned(
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        child: positionProgressWiget(config!),
+                      ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: VideoBookmarkButton(file: file),
+                    ),
                   ],
                 ),
               ),
@@ -62,7 +86,7 @@ class VideoGridItem extends StatelessWidget {
     );
   }
 
-  Widget get durationWidget {
+  Widget durationWidget(Duration dur) {
     return Container(
       padding: EdgeInsets.all(1),
       decoration: BoxDecoration(
@@ -70,9 +94,27 @@ class VideoGridItem extends StatelessWidget {
         borderRadius: .circular(2),
       ),
       child: Text(
-        file.duration.toRemainingLabel(),
+        dur.toRemainingLabel(),
         style: TextStyle(color: Colors.white, fontSize: 10),
       ),
+    );
+  }
+
+  Widget positionProgressWiget(VideoConfig config) {
+    return Column(
+      crossAxisAlignment: .start,
+      children: [
+        Container(
+          decoration: BoxDecoration(color: Colors.black),
+          child: Text(
+            '${config.current.formatTimeLable()}/${config.duration.formatTimeLable()}',
+            style: TextStyle(fontSize: 10, color: Colors.blue),
+          ),
+        ),
+        LinearProgressIndicator(
+          value: config.current.inMilliseconds / config.duration.inMilliseconds,
+        ),
+      ],
     );
   }
 
@@ -82,9 +124,11 @@ class VideoGridItem extends StatelessWidget {
 
     if (thumbnailFile.existsSync()) return TImage(source: thumbnailFile.path);
     return FutureBuilder(
-      // future: VideoUtils.genVideoThumbnail(file.path, thumbnailFile),
-      future: ThanPkg.platform.genVideoThumbnail(
-        pathList: [SrcDistType(src: file.path, dist: thumbnailFile.path)],
+      future: PlatformUtils.genVideoThumbnail(
+        file.path,
+        thumbnailFile.path,
+        width: 400,
+        height: 400,
       ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == .waiting) {

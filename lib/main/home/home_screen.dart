@@ -53,13 +53,13 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             decoration: BoxDecoration(
               color: context.brightness == Brightness.dark
-                  ? Colors.black.withOpacity(0.3) // Dark mode မဲမဲမှန်ကြည်
-                  : Colors.white.withOpacity(0.4), // Light mode ဖြူဖြူမှန်ကြည်
+                  ? Colors.black.withValues(alpha: 0.3) // Dark mode မဲမဲမှန်ကြည်
+                  : Colors.white.withValues(alpha: 0.4), // Light mode ဖြူဖြူမှန်ကြည်
               border: Border(
                 top: BorderSide(
                   color: context.brightness == Brightness.dark
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.black.withOpacity(0.05),
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.black.withValues(alpha: 0.05),
                   width: 0.5,
                 ),
               ),
@@ -71,8 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
               currentIndex: index,
               selectedItemColor: Colors.teal,
               unselectedItemColor: context.brightness == Brightness.dark
-                  ? Colors.white.withOpacity(0.6)
-                  : Colors.black.withOpacity(0.6),
+                  ? Colors.white.withValues(alpha: 0.6)
+                  : Colors.black.withValues(alpha: 0.6),
               onTap: (value) {
                 setState(() {
                   index = value;

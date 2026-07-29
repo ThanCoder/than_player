@@ -4,6 +4,22 @@ import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/state/video/video_state_controller.dart';
 import 'package:than_player/extensions/build_context_exts.dart';
+import 'package:than_player/main/home/video/video_content_screen.dart';
+import 'package:than_player/video_config/video_config.dart';
+import 'package:than_player/video_config/video_config_services.dart';
+
+Future<void> goVideoContentScreen(BuildContext context, VideoFile file) async {
+  final config = await context.push<VideoConfig>(
+    builder: (mainContext) => VideoContentScreen(
+      file: file,
+      currentPositionInMiliseconds: VideoConfigServices.instance
+          .getCurrentPosition(file.id),
+    ),
+  );
+  if (config != null) {
+    await VideoConfigServices.instance.setConfig(file.id, config);
+  }
+}
 
 void showVideoContextItemMenu(BuildContext context, VideoFile file) {
   showTMenuBottomSheet(

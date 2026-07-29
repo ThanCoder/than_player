@@ -8,10 +8,17 @@ import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
+import 'package:than_player/extensions/build_context_exts.dart';
+import 'package:than_player/video_config/video_config.dart';
 
 class VideoContentScreen extends StatefulWidget {
   final VideoFile file;
-  const VideoContentScreen({super.key, required this.file});
+  final int? currentPositionInMiliseconds;
+  const VideoContentScreen({
+    super.key,
+    required this.file,
+    this.currentPositionInMiliseconds,
+  });
 
   @override
   State<VideoContentScreen> createState() => _VideoContentScreenState();
@@ -21,16 +28,19 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
   late final player = Player();
   late final controller = VideoController(player);
   bool isKeepProtraitMode = false;
+  FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    focusNode.requestFocus();
     init();
   }
 
   @override
   void dispose() {
     player.dispose();
+    focusNode.dispose();
     ThanPkg.platform.toggleFullScreen(isFullScreen: false);
     super.dispose();
   }
@@ -42,27 +52,30 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
 
       await player.open(Media(widget.file.path));
 
-      late StreamSubscription<VideoParams> videoParamsSub;
-      videoParamsSub = player.stream.videoParams.listen((event) async {
+      await controller.waitUntilFirstFrameRendered;
+
+      if (player.state.width != null && player.state.height != null) {
         if (player.state.width != null && player.state.height != null) {
-          if (player.state.width != null && player.state.height != null) {
-            isKeepProtraitMode =
-                (player.state.width! / player.state.height!) < 0.8;
-            setState(() {});
+          isKeepProtraitMode =
+              (player.state.width! / player.state.height!) < 0.8;
 
-            // -------------------------------------------------------------
-            // ✨ ဗီဒီယို ပမာဏသိတာနဲ့ Fullscreen ထဲ တန်းဝင်ခိုင်းသည့် အပိုင်း
-            // -------------------------------------------------------------
-            // if (isKeepProtraitMode) {
-            //   await ThanPkg.platform.toggleFullScreen(isFullScreen: true);
-            // } else {
-            //   await defaultEnterNativeFullscreen();
-            // }
-
-            videoParamsSub.cancel();
-          }
+          setState(() {});
         }
-      });
+      }
+      // Duration မရှိသေးရင် ခဏစောင့်မည်
+      if (player.state.duration == Duration.zero) {
+        await player.stream.duration.firstWhere((d) => d > Duration.zero);
+      }
+      await player.stream.buffer.first;
+
+      // seek
+      if (widget.currentPositionInMiliseconds != null &&
+          widget.currentPositionInMiliseconds != 0) {
+        // await Future.delayed(Duration(milliseconds: 1200));
+        await player.seek(
+          Duration(milliseconds: widget.currentPositionInMiliseconds!),
+        );
+      }
     } catch (e) {
       debugPrint('[_VideoContentScreenState:init]: $e');
       if (!mounted) return;
@@ -72,11 +85,18 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData.dark(),
-      child: Scaffold(
-        appBar: TPlatform.isDesktop ? AppBar() : null,
-        body: Stack(children: [playerWidget]),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        onPlayerClosed();
+      },
+      child: Theme(
+        data: ThemeData.dark(),
+        child: Scaffold(
+          appBar: TPlatform.isDesktop ? AppBar() : null,
+          body: Stack(children: [playerWidget]),
+        ),
       ),
     );
   }
@@ -111,6 +131,7 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
 
   Widget get videoWidget {
     return Video(
+      focusNode: focusNode,
       controller: controller,
       controls: (state) => Platform.isLinux
           ? MaterialDesktopVideoControls(state)
@@ -130,5 +151,14 @@ class _VideoContentScreenState extends State<VideoContentScreen> {
         }
       },
     );
+  }
+
+  Future<void> onPlayerClosed() async {
+    final duration = controller.player.state.duration;
+    final current = controller.player.state.position;
+
+    await player.stop();
+    if (!mounted) return;
+    context.pop<VideoConfig>(VideoConfig(duration: duration, current: current));
   }
 }

@@ -6,6 +6,8 @@ import 'package:than_player/audio_bookmark/audio_bookmark_controller.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/core/utils/utils.dart';
 import 'package:than_player/main/main_app.dart';
+import 'package:than_player/video_bookmark/video_bookmark_controller.dart';
+import 'package:than_player/video_config/video_config_services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +31,8 @@ void main() async {
     Utils.instance.getConfigPath('config.store.cfb'),
   );
   await AudioBookmarkController.instance.init();
+  await VideoBookmarkController.instance.init();
+  await VideoConfigServices.instance.init();
 
   runApp(const MainApp());
 }

@@ -30,6 +30,7 @@ dependencies:
   screen_brightness: ^2.1.11
   than_pkg_linux: ^0.0.1
   than_pkg_android: ^0.2.1
+  desktop_drop: ^0.7.1
 
 dev_dependencies:
   flutter_test:
