@@ -14,10 +14,12 @@ void showVideoContextItemMenu(BuildContext context, VideoFile file) {
         leading: Icon(Icons.edit_document),
         title: Text('Rename'),
         onTap: () {
+          final parts = file.name.split('.');
+          parts.removeLast();
           context.pop();
           showTReanmeDialog(
             context,
-            text: file.name.onlyName,
+            text: parts.join('.'),
             isSelectAll: true,
             autofocus: true,
             submitText: 'Rename',

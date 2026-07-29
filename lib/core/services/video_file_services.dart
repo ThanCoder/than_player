@@ -34,7 +34,7 @@ class VideoFileServices {
       if (!await videoIoFile.exists()) return null;
 
       final directory = videoIoFile.parent.path;
-      final newPath = '$directory/$newName.';
+      final newPath = '$directory/$newName';
 
       final renamedFile = await videoIoFile.rename(newPath);
 

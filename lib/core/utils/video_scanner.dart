@@ -13,6 +13,23 @@ class VideoScanner extends PathScanner<VideoFile> {
     final size = entry.file.lengthSync();
     // 1mb အောက် မလိုဘူး
     if (size < 1024 * 1024) return false;
+
+    const videoExtensions = {
+      'mp4',
+      'mkv',
+      'avi',
+      'mov',
+      'flv',
+      'wmv',
+      'webm',
+      'm4v',
+      '3gp',
+    };
+    final ext = name.extName.toLowerCase();
+    if (videoExtensions.contains(ext)) {
+      return true;
+    }
+
     final mm = lookupMimeType(entry.path);
     if (mm == null) return false;
     if (mm.startsWith('video')) {
