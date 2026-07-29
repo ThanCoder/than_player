@@ -45,7 +45,7 @@ class _VideoHomePageState extends State<VideoHomePage> {
   Future<void> init() async {
     try {
       folderType = VideoFolderType.fromName(
-        CFBStoreBase.getInstance.getString('video-folder-type'),
+        CFBStore.getInstance.getString('video-folder-type'),
       );
 
       if (!await ThanPkg.platform.isStoragePermissionGranted()) {
@@ -143,11 +143,11 @@ class _VideoHomePageState extends State<VideoHomePage> {
                   folderType = .allVideo;
                   setState(() {});
 
-                  CFBStoreBase.getInstance.put(
+                  CFBStore.getInstance.put(
                     'video-folder-type',
                     folderType.name,
                   );
-                  CFBStoreBase.getInstance.writeAll();
+                  CFBStore.getInstance.writeAll();
                   context.pop();
                 },
               ),
@@ -160,11 +160,11 @@ class _VideoHomePageState extends State<VideoHomePage> {
                 onChanged: (value) {
                   folderType = .allFolders;
                   setState(() {});
-                  CFBStoreBase.getInstance.put(
+                  CFBStore.getInstance.put(
                     'video-folder-type',
                     folderType.name,
                   );
-                  CFBStoreBase.getInstance.writeAll();
+                  CFBStore.getInstance.writeAll();
                   context.pop();
                 },
               ),

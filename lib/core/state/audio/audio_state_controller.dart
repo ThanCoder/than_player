@@ -1,13 +1,10 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:cfb_store/cfb_store.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/my_audio_handler.dart';
-import 'package:than_player/core/utils/audio_scanner.dart';
 import 'package:than_player/core/utils/utils.dart';
 import 'package:than_player/partials/sort_provider.dart';
 
@@ -41,58 +38,8 @@ class AudioStateController {
     _listenToAudioHandler();
   }
 
-  Future<void> scanAudioList() async {
-    try {
-      //**************Sort****************** */
-      SortItem sortItem = sortList[1];
-      final recentSortId = CFBStoreBase.getInstance.getInt(
-        'audio-file-sort-id',
-        sortItem.id,
-      );
-      final recentSortTrue = CFBStoreBase.getInstance.getBool(
-        'audio-file-sort-true',
-      );
-      if (recentSortId != sortItem.id) {
-        final index = sortList.indexWhere((e) => e.id == recentSortId);
-        if (index != -1) {
-          sortItem = sortList[index].copyWith(isTrue: recentSortTrue);
-        }
-      }
-      _state = _state.copyWith(
-        error: '',
-        isLoading: true,
-        list: [],
-        sortItem: sortItem,
-      );
-      _controller.add(_state);
-
-      final list = await AudioScanner().scan();
-      _state = _state.copyWith(isLoading: false, list: list);
-      sort();
-      _controller.add(_state);
-    } catch (e) {
-      _state = _state.copyWith(error: e.toString(), isLoading: false);
-      _controller.add(_state);
-    }
-  }
-
-  void sort() {
-    if (_state.sortItem.id == SortItem.nameSortItem.id) {
-      _state.list.sortName(isA2Z: _state.sortItem.isTrue);
-    } else if (_state.sortItem.id == SortItem.dateSortItem.id) {
-      _state.list.sortDate(isNewest: _state.sortItem.isTrue);
-    } else if (_state.sortItem.id == SortItem.sizeSortItem.id) {
-      _state.list.sortSize(smToBig: _state.sortItem.isTrue);
-    }
-  }
-
-  void setSort(SortItem item) {
-    CFBStoreBase.getInstance.put('audio-file-sort-id', item.id);
-    CFBStoreBase.getInstance.put('audio-file-sort-true', item.isTrue);
-    CFBStoreBase.getInstance.writeAll();
-
-    _state = _state.copyWith(sortItem: item);
-    sort();
+  void setAudioList(List<AudioFile> files) {
+    _state = _state.copyWith(list: files);
     _controller.add(_state);
   }
 
@@ -130,9 +77,8 @@ class AudioStateController {
   }
 
   Future<void> playTrack(AudioFile file) async {
-    debugPrint('file.cachCoverPath: ${file.cachCoverPath}');
     final item = MediaItem(
-      id: file.name,
+      id: file.id,
       title: file.meta.title ?? file.name,
       duration: file.meta.duration,
       artUri: Uri.file(file.cachCoverPath),
@@ -153,10 +99,19 @@ class AudioStateController {
     }
   }
 
+  bool existsByIndex(int index) {
+    return index >= 0 && index < _state.list.length;
+  }
+
+  int get currentSongIndex {
+    if (state.currentSong == null) return -1;
+    return state.list.indexWhere((e) => e.id == state.currentSong!.id);
+  }
+
   void prev() async {
     final current = state.currentSong;
     if (current == null) return;
-    final index = _state.list.indexWhere((e) => e.name == current.id);
+    final index = _state.list.indexWhere((e) => e.id == current.id);
     if (index == -1) {
       return;
     }
@@ -168,8 +123,8 @@ class AudioStateController {
   void next() async {
     final current = state.currentSong;
     if (current == null) return;
-    final index = _state.list.indexWhere((e) => e.name == current.id);
-    if (index > state.list.length) {
+    final index = _state.list.indexWhere((e) => e.id == current.id);
+    if (index + 1 == state.list.length) {
       return;
     }
     final file = state.list[index + 1];
@@ -191,18 +146,22 @@ class AudioStateController {
   }
 
   AudioFile? getAudioFileById(String id) {
-    final index = _state.list.indexWhere((e) => e.name == id);
+    final index = _state.list.indexWhere((e) => e.id == id);
     if (index != -1) {
       return state.list[index];
     }
     return null;
   }
 
+  bool isCurrentSong(String id) {
+    if (state.currentSong == null) return false;
+    if (state.currentSong!.id == id) return true;
+    return false;
+  }
+
   AudioFile? get currentAudioFile {
     if (state.currentSong == null) return null;
-    final index = _state.list.indexWhere(
-      (e) => e.name == state.currentSong!.id,
-    );
+    final index = _state.list.indexWhere((e) => e.id == state.currentSong!.id);
     if (index != -1) {
       return state.list[index];
     }

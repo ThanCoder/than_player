@@ -6,6 +6,7 @@ import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:mime/mime.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/models/audio_meta.dart';
+import 'package:than_player/core/utils/file_utils.dart';
 import 'package:than_player/core/utils/path_scanner.dart';
 
 class AudioScanner extends PathScanner<AudioFile> {
@@ -25,12 +26,13 @@ class AudioScanner extends PathScanner<AudioFile> {
         return null;
       }
       return AudioFile(
+        id: FileUtils.getFileIdSync(entry.path),
         name: name,
         path: entry.path,
         dirname: entry.parent.onlyName,
         date: entry.modifiedDate,
         meta: meta,
-        size: entry.size
+        size: entry.size,
       );
     }
     return null;

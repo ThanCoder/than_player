@@ -2,6 +2,7 @@ import 'package:cfb_store/cfb_store.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:t_widgets/t_widgets.dart';
+import 'package:than_player/audio_bookmark/audio_bookmark_controller.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/core/utils/utils.dart';
 import 'package:than_player/main/main_app.dart';
@@ -24,9 +25,10 @@ void main() async {
   );
   await AudioStateController.instance.init();
 
-  await CFBStoreBase.getInstance.open(
+  await CFBStore.getInstance.open(
     Utils.instance.getConfigPath('config.store.cfb'),
   );
+  await AudioBookmarkController.instance.init();
 
   runApp(const MainApp());
 }

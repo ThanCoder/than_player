@@ -29,8 +29,7 @@ dependencies:
   package_info_plus: ^10.2.0
   marquee: ^2.3.0
   crypto: ^3.0.7
-  cfb_store:
-    git: https://github.com/ThanCoder/cfb_store_dart.git
+  cfb_store: ^0.3.0
   screen_brightness: ^2.1.11
 
 dev_dependencies:

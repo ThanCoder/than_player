@@ -7,12 +7,14 @@ import 'package:than_player/core/utils/utils.dart';
 
 class AudioFile {
   final String name;
+  final String id;
   final String path;
   final String dirname;
   final DateTime date;
   final AudioMeta meta;
   final int size;
   const AudioFile({
+    required this.id,
     required this.name,
     required this.path,
     required this.dirname,

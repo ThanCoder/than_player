@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
+import 'package:than_player/audio_bookmark/audio_bookmark_button.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
@@ -20,6 +21,7 @@ class AudioListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // print('current: ${AudioStateController.instance.isCurrentSong(file.id)}');
     return StreamBuilder(
       stream: AudioStateController().stateStream,
       initialData: AudioStateController().state,
@@ -31,24 +33,25 @@ class AudioListItem extends StatelessWidget {
           onLongPress: () => onMenuClicked?.call(file),
           onSecondaryTap: () => onMenuClicked?.call(file),
           child: Card(
-            color:
-                state.currentSong != null && state.currentSong!.id == file.name
-                ? const Color.fromARGB(235, 18, 172, 159)
-                : context.brightness == .dark
-                ? Colors.black.withValues(alpha: .3)
-                : Colors.white.withValues(alpha: .7),
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Row(
-                spacing: 4,
-                children: [
-                  SizedBox(
-                    width: Platform.isAndroid ? 50 : 90,
-                    height: Platform.isAndroid ? 50 : 90,
-                    child: stateWidget(state),
+            color: itemBackgroundColor(context, file),
+            child: ClipRRect(
+              borderRadius: .circular(12),
+              child: BackdropFilter(
+                filter: .blur(sigmaX: 10, sigmaY: 10),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Row(
+                    spacing: 4,
+                    children: [
+                      SizedBox(
+                        width: Platform.isAndroid ? 40 : 60,
+                        height: Platform.isAndroid ? 40 : 60,
+                        child: stateWidget(state),
+                      ),
+                      Expanded(child: metaWidget),
+                    ],
                   ),
-                  Expanded(child: metaWidget),
-                ],
+                ),
               ),
             ),
           ),
@@ -57,31 +60,49 @@ class AudioListItem extends StatelessWidget {
     );
   }
 
+  Color? itemBackgroundColor(BuildContext context, AudioFile file) {
+    if (AudioStateController.instance.isCurrentSong(file.id)) {
+      return Colors.teal;
+    } else {
+      return context.brightness.isDark
+          ? const Color.fromARGB(60, 0, 0, 0)
+          : const Color.fromARGB(88, 222, 222, 222);
+    }
+  }
+
   Widget get metaWidget {
     final meta = file.meta;
 
     return Column(
-      spacing: 2,
+      spacing: 1,
       crossAxisAlignment: .start,
       children: [
         Text(
           file.name,
           maxLines: Platform.isAndroid ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
         ),
         Row(
           children: [
-            if (meta.duration != null) Text(meta.formatDuration),
-            IconButton(onPressed: () {}, icon: Icon(Icons.favorite, size: 20)),
+            if (meta.duration != null)
+              Text(meta.formatDuration, style: TextStyle(fontSize: 11)),
+            AudioBookmarkButton(file: file, iconSize: 20),
             if (meta.artist != null)
-              Expanded(child: Text(' - ${meta.artist!}', maxLines: 1)),
+              Expanded(
+                child: Text(
+                  ' - ${meta.artist!}',
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 11),
+                ),
+              ),
           ],
         ),
         // audio info
         if (meta.info != null)
           Text(
             '${meta.formatLabel} * ${meta.bitrateLabel} * ${meta.sampleRateLabel}',
+            style: TextStyle(fontSize: 11),
           ),
       ],
     );
@@ -91,11 +112,6 @@ class AudioListItem extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(child: coverWidget),
-        Container(
-          decoration: BoxDecoration(
-            // color: Colors.black.withValues(alpha: .4),
-          ),
-        ),
         if (state.currentSong != null && state.currentSong!.id == file.name)
           Positioned(
             bottom: 10,
@@ -117,12 +133,7 @@ class AudioListItem extends StatelessWidget {
           return Center(child: TLoader());
         }
         final cachePath = snapshot.data!;
-        final cacheFile = File(cachePath);
-        if (cacheFile.existsSync()) {
-          return TImageFile(path: cachePath);
-        } else {
-          return Icon(Icons.image, size: Platform.isAndroid ? null : 90);
-        }
+        return TImageFile(path: cachePath);
       },
     );
   }

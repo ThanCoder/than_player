@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart';
+import 'package:than_player/audio_bookmark/audio_bookmark_button.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/main/home/audio/audio_seeker_widget.dart';
@@ -61,7 +62,14 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
                   top: TPlatform.isDesktop ? 0 : 50,
                   left: 0,
                   right: 0,
-                  child: SafeArea(child: contentWidget(state)),
+                  child: SafeArea(
+                    child: ClipRRect(
+                      child: BackdropFilter(
+                        filter: .blur(sigmaX: 10, sigmaY: 10),
+                        child: contentWidget(state),
+                      ),
+                    ),
+                  ),
                 ),
                 // background colors
                 Positioned(
@@ -111,7 +119,6 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
       child: Column(
         spacing: 5,
         children: [
-          // 💡 ပြင်ဆင်ချက်: Content ထဲက ပုံကို Size အသေ ကန့်သတ်ပြီး Shadow လေး ထည့်ပေးမယ်
           Center(
             child: Container(
               width: 280, // Music App တွေရဲ့ Standard ပုံအရွယ်အစား
@@ -132,7 +139,6 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
               ),
             ),
           ),
-          // const SizedBox(height: 10),
 
           // သီချင်းခေါင်းစဉ်နှင့် အဆိုတော်အမည်
           marqueeWidget(currentAudioFile.meta.title ?? currentAudioFile.name),
@@ -179,6 +185,7 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
 
   // controls
   Widget controlsWidget(AudioState state) {
+    print(AudioStateController.instance.currentSongIndex);
     final meta = AudioStateController().currentAudioFile!.meta;
     return Column(
       children: [
@@ -188,7 +195,12 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
           spacing: 3,
           children: [
             IconButton(
-              onPressed: AudioStateController.instance.prev,
+              onPressed:
+                  !AudioStateController.instance.existsByIndex(
+                    AudioStateController.instance.currentSongIndex - 1,
+                  )
+                  ? null
+                  : AudioStateController.instance.prev,
               icon: Icon(Icons.skip_previous_rounded, size: 40),
             ),
             IconButton(
@@ -200,8 +212,14 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
                 size: 70,
               ),
             ),
+
             IconButton(
-              onPressed: AudioStateController.instance.next,
+              onPressed:
+                  !AudioStateController.instance.existsByIndex(
+                    AudioStateController.instance.currentSongIndex + 1,
+                  )
+                  ? null
+                  : AudioStateController.instance.next,
               icon: Icon(Icons.skip_next, size: 40),
             ),
           ],
@@ -212,17 +230,21 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
           '${meta.formatLabel} * ${meta.bitrateLabel} * ${meta.sampleRateLabel}',
         ),
         const SizedBox(height: 5),
-        menuWidget,
+        menuWidget(state),
       ],
     );
   }
 
-  Widget get menuWidget {
+  Widget menuWidget(AudioState state) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         IconButton(onPressed: () {}, icon: Icon(Icons.timelapse)),
-        IconButton(onPressed: () {}, icon: Icon(Icons.favorite)),
+        AudioBookmarkButton(
+          file: AudioStateController.instance.getAudioFileById(
+            state.currentSong!.id,
+          )!,
+        ),
         IconButton(onPressed: () {}, icon: Icon(Icons.list)),
       ],
     );

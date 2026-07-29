@@ -4,12 +4,11 @@ import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart' hide TPlatform;
-import 'package:than_player/core/state/audio/audio_state.dart';
+import 'package:than_player/core/state/all_audio/all_audio_state.dart';
+import 'package:than_player/core/state/all_audio/all_audio_state_controller.dart';
 import 'package:than_player/extensions/build_context_exts.dart';
-import 'package:than_player/main/components/audio_list_item.dart';
-import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
-import 'package:than_player/main/home/audio/audio_edit_cover_page.dart';
+import 'package:than_player/main/components/audio_sliver_list.dart';
 import 'package:than_player/partials/sort_provider.dart';
 
 class AudioHomePage extends StatefulWidget {
@@ -24,6 +23,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
   @override
   void initState() {
     super.initState();
+    if (AllAudioStateController.instance.state.list.isNotEmpty) return;
     if (widget.isCurrentPage && !isCalled) {
       init();
     }
@@ -32,6 +32,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
   @override
   void didUpdateWidget(covariant AudioHomePage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (AllAudioStateController.instance.state.list.isNotEmpty) return;
     if (widget.isCurrentPage && !isCalled) {
       init();
     }
@@ -44,7 +45,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
         await ThanPkg.platform.requestStoragePermission();
         return;
       }
-      await AudioStateController.instance.scanAudioList();
+      await AllAudioStateController.instance.scanAudioListFromStorage();
       isCalled = true;
       setState(() {});
     } catch (e) {
@@ -63,7 +64,9 @@ class _AudioHomePageState extends State<AudioHomePage> {
               actions: [
                 if (TPlatform.isDesktop)
                   IconButton(
-                    onPressed: AudioStateController.instance.scanAudioList,
+                    onPressed: AllAudioStateController
+                        .instance
+                        .scanAudioListFromStorage,
                     icon: Icon(Icons.refresh),
                   ),
               ],
@@ -77,12 +80,11 @@ class _AudioHomePageState extends State<AudioHomePage> {
           return SafeArea(
             child: Stack(
               children: [
-                // Positioned.fill(child: backgroundCoverWidget),
+                Positioned.fill(child: backgroundCoverWidget),
                 Positioned.fill(
                   bottom: state.showFloatingAudioWidget ? 70 : 0,
                   child: listWidget,
                 ),
-                // Positioned(bottom: 0, left: 0, right: 0, child: playingWidget),
               ],
             ),
           );
@@ -92,33 +94,39 @@ class _AudioHomePageState extends State<AudioHomePage> {
   }
 
   Widget get backgroundCoverWidget {
-    return StreamBuilder(
-      stream: AudioStateController.instance.stateStream,
-      builder: (context, asyncSnapshot) {
-        return FutureBuilder(
-          future: AudioStateController().currentCoverPath,
-          builder: (context, snapshot) {
-            final coverFile = File(snapshot.data ?? '');
-            if (!coverFile.existsSync()) {
-              return SizedBox.fromSize();
-            }
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: .4),
-              ),
+    return ClipRRect(
+      borderRadius: .circular(10),
+      child: BackdropFilter(
+        filter: .blur(sigmaX: 10, sigmaY: 10),
+        child: StreamBuilder(
+          stream: AudioStateController.instance.stateStream,
+          builder: (context, asyncSnapshot) {
+            return FutureBuilder(
+              future: AudioStateController().currentCoverPath,
+              builder: (context, snapshot) {
+                final coverFile = File(snapshot.data ?? '');
+                if (!coverFile.existsSync()) {
+                  return SizedBox.fromSize();
+                }
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: .4),
+                  ),
 
-              child: TImageFile(path: snapshot.data ?? ''),
+                  child: TImageFile(path: snapshot.data ?? ''),
+                );
+              },
             );
           },
-        );
-      },
+        ),
+      ),
     );
   }
 
   Widget get listWidget {
     return StreamBuilder(
-      stream: AudioStateController.instance.stateStream,
-      initialData: AudioStateController.instance.state,
+      stream: AllAudioStateController.instance.stateStream,
+      initialData: AllAudioStateController.instance.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
         if (state.isLoading) {
@@ -134,9 +142,12 @@ class _AudioHomePageState extends State<AudioHomePage> {
               slivers: [
                 SliverToBoxAdapter(child: headerWidget(state)),
                 // list
-                SliverList.builder(
-                  itemCount: state.list.length,
-                  itemBuilder: (context, index) => listItem(state.list[index]),
+                AudioSliverList(
+                  list: state.list,
+                  onClicked: (file) {
+                    AudioStateController.instance.setAudioList(state.list);
+                    AudioStateController.instance.playTrack(file);
+                  },
                 ),
               ],
             ),
@@ -146,7 +157,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
     );
   }
 
-  Widget headerWidget(AudioState state) {
+  Widget headerWidget(AllAudioState state) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       color: context.brightness == .dark
@@ -160,51 +171,16 @@ class _AudioHomePageState extends State<AudioHomePage> {
             stream: AudioStateController().stateStream,
             builder: (context, asyncSnapshot) {
               return SortButton(
-                value: AudioStateController().state.sortItem,
-                list: AudioStateController().sortList,
+                value: state.sortItem,
+                list: AllAudioStateController().sortList,
                 onApply: (item) {
-                  AudioStateController().setSort(item);
+                  AllAudioStateController().setSort(item);
                 },
               );
             },
           ),
         ],
       ),
-    );
-  }
-
-  Widget listItem(AudioFile file) {
-    return AudioListItem(
-      file: file,
-      onClicked: (file) {
-        AudioStateController.instance.playTrack(file);
-      },
-      onMenuClicked: showAudioMenu,
-    );
-  }
-
-  void showAudioMenu(AudioFile file) {
-    showTMenuBottomSheet(
-      context,
-      children: [
-        ListTile(
-          title: Text('Edit Cover'),
-          onTap: () async {
-            context.pop();
-            await context.push(
-              builder: (mainContext) => AudioEditCoverPage(file: file),
-            );
-            setState(() {});
-          },
-        ),
-        ListTile(
-          title: Text('Open External'),
-          onTap: () {
-            context.pop();
-            ThanPkg.platform.launch(file.path);
-          },
-        ),
-      ],
     );
   }
 }

@@ -7,69 +7,81 @@ import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/extensions/build_context_exts.dart';
+import 'package:than_player/main/home/audio/audio_content_page_one.dart';
 
 class PlayingAudioWidget extends StatelessWidget {
   const PlayingAudioWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: AudioStateController().stateStream,
-      initialData: AudioStateController().state,
-      builder: (context, snapshot) {
-        final state = snapshot.data!;
-        if (!state.showFloatingAudioWidget) {
-          return SizedBox.shrink();
-        }
-        return StreamBuilder(
-          stream: AudioStateController.instance.playbackEventStream,
+    return ClipRRect(
+      borderRadius: .circular(15),
+      child: BackdropFilter(
+        filter: .blur(sigmaX: 10, sigmaY: 10),
+        child: StreamBuilder(
+          stream: AudioStateController().stateStream,
+          initialData: AudioStateController().state,
           builder: (context, snapshot) {
-            PlaybackEvent? playbackEvent = snapshot.data;
-            if (playbackEvent == null) {
-              return SizedBox.fromSize();
+            final state = snapshot.data!;
+            if (!state.showFloatingAudioWidget) {
+              return SizedBox.shrink();
             }
-            MediaItem? currentSong =
-                AudioStateController.instance.state.currentSong;
-            if (currentSong == null) {
-              return SizedBox.fromSize();
-            }
-            final audioFile = AudioStateController().getAudioFileById(
-              currentSong.id,
-            );
-            if (audioFile == null) {
-              return SizedBox.fromSize();
-            }
-            return Container(
-              decoration: BoxDecoration(
-                color: context.brightness == .dark
-                    ? const Color.fromARGB(255, 15, 15, 15)
-                    : Colors.white,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  spacing: 4,
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: coverWidget(audioFile),
+            return StreamBuilder(
+              stream: AudioStateController.instance.playbackEventStream,
+              builder: (context, snapshot) {
+                PlaybackEvent? playbackEvent = snapshot.data;
+                if (playbackEvent == null) {
+                  return SizedBox.fromSize();
+                }
+                MediaItem? currentSong =
+                    AudioStateController.instance.state.currentSong;
+                if (currentSong == null) {
+                  return SizedBox.fromSize();
+                }
+                final audioFile = AudioStateController().getAudioFileById(
+                  currentSong.id,
+                );
+                if (audioFile == null) {
+                  return SizedBox.fromSize();
+                }
+                return InkWell(
+                  onTap: () => context.push(
+                    builder: (mainContext) => AudioContentPageOne(),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: context.brightness == .dark
+                          ? const Color.fromARGB(71, 15, 15, 15)
+                          : const Color.fromARGB(75, 255, 255, 255),
                     ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 3,
-                        children: metaWidget(audioFile, playbackEvent),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        spacing: 4,
+                        children: [
+                          SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: coverWidget(audioFile),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 3,
+                              children: metaWidget(audioFile, playbackEvent),
+                            ),
+                          ),
+                          handlerWidget(playbackEvent),
+                        ],
                       ),
                     ),
-                    handlerWidget(playbackEvent),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             );
           },
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -78,7 +90,9 @@ class PlayingAudioWidget extends StatelessWidget {
       future: audioFile.meta.readImageCache('${audioFile.name.onlyName}.png'),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: TLoaderRandom());
+          return Center(
+            child: SizedBox(width: 50, height: 50, child: TLoaderRandom()),
+          );
         }
         final cachePath = snapshot.data!;
         // print(cachePath);
@@ -100,10 +114,6 @@ class PlayingAudioWidget extends StatelessWidget {
         ),
       ),
       if (meta.artist != null) Text(meta.artist!, maxLines: 1),
-      // if (playbackEvent.duration != null)
-      //   Text(
-      //     '${playbackEvent.updatePosition.formatTimeLable()}/${playbackEvent.duration!.formatTimeLable()}',
-      //   ),
 
       // song progress
       songProgressWidget(playbackEvent),

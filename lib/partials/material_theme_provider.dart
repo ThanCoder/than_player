@@ -23,13 +23,13 @@ class MaterialThemeProvider extends StatefulWidget {
 
   static final themeTypeNotifier = ValueNotifier<MaterialThemeProviderType>(
     MaterialThemeProviderType.fromName(
-      CFBStoreBase.getInstance.getString('app-theme'),
+      CFBStore.getInstance.getString('app-theme'),
     ),
   );
   static void setTheme(MaterialThemeProviderType type) {
     themeTypeNotifier.value = type;
-    CFBStoreBase.getInstance.put('app-theme', type.name);
-    CFBStoreBase.getInstance.writeAll();
+    CFBStore.getInstance.put('app-theme', type.name);
+    CFBStore.getInstance.writeAll();
   }
 }
 
@@ -40,7 +40,7 @@ class _MaterialThemeProviderState extends State<MaterialThemeProvider>
     WidgetsBinding.instance.addObserver(this);
     MaterialThemeProvider.themeTypeNotifier.value =
         MaterialThemeProviderType.fromName(
-          CFBStoreBase.getInstance.getString('app-theme'),
+          CFBStore.getInstance.getString('app-theme'),
         );
     super.initState();
   }

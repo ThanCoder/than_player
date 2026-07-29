@@ -2,7 +2,6 @@
 import 'package:audio_service/audio_service.dart';
 
 import 'package:than_player/core/models/audio_file.dart';
-import 'package:than_player/partials/sort_provider.dart';
 
 class AudioState {
   final String error;
@@ -11,7 +10,6 @@ class AudioState {
   final bool isPlaying;
   final bool showFloatingAudioWidget;
   final MediaItem? currentSong;
-  final SortItem sortItem;
   const AudioState({
     required this.error,
     required this.isLoading,
@@ -19,14 +17,12 @@ class AudioState {
     required this.isPlaying,
     required this.showFloatingAudioWidget,
     this.currentSong,
-    required this.sortItem,
   });
   factory AudioState.empty() {
     return AudioState(
       error: '',
       isLoading: false,
       list: [],
-      sortItem: .dateSortItem,
       isPlaying: false,
       showFloatingAudioWidget: false,
     );
@@ -39,7 +35,6 @@ class AudioState {
     bool? isPlaying,
     bool? showFloatingAudioWidget,
     MediaItem? currentSong,
-    SortItem? sortItem,
   }) {
     return AudioState(
       error: error ?? this.error,
@@ -49,7 +44,6 @@ class AudioState {
       showFloatingAudioWidget:
           showFloatingAudioWidget ?? this.showFloatingAudioWidget,
       currentSong: currentSong ?? this.currentSong,
-      sortItem: sortItem ?? this.sortItem,
     );
   }
 }
