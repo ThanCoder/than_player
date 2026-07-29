@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart';
@@ -31,7 +32,12 @@ class VideoGridItem extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 height: double.infinity,
-                child: thumbnailWidget,
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: thumbnailWidget),
+                    Positioned(bottom: 0, right: 0, child: durationWidget),
+                  ],
+                ),
               ),
             ),
             Row(
@@ -52,6 +58,20 @@ class VideoGridItem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget get durationWidget {
+    return Container(
+      padding: EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: .5),
+        borderRadius: .circular(2),
+      ),
+      child: Text(
+        file.duration.toRemainingLabel(),
+        style: TextStyle(color: Colors.white, fontSize: 10),
       ),
     );
   }

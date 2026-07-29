@@ -1,9 +1,29 @@
 import 'dart:io';
 
+import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:than_pkg/than_pkg.dart';
 import 'package:than_pkg_android/than_pkg_android.dart';
 
 class PlatformUtils {
+  static Future<List<String>> getScanRootPath() async {
+    final scanFolders = <String>[];
+    if (Platform.isLinux) {
+      scanFolders.add((await getApplicationDocumentsDirectory()).path);
+      scanFolders.add((await getDownloadsDirectory())!.path);
+      final homePath = Platform.environment['HOME'];
+      if (homePath != null) {
+        scanFolders.add(homePath.join('Music'));
+        scanFolders.add(homePath.join('Videos'));
+      }
+    }
+    if (Platform.isAndroid) {
+      scanFolders.add(ThanPkg.android.app.getAppExternalPath());
+    }
+    return scanFolders;
+  }
+
   static Future<Duration> getDuration(String path) async {
     if (Platform.isAndroid) {
       final res = await ThanPkgAndroid.getInstance.videoHandler.getDuration(

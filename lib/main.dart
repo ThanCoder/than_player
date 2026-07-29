@@ -10,15 +10,6 @@ import 'package:than_player/main/main_app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Status bar ကို အလင်းပေါက် ဖြစ်စေရန် သတ်မှတ်ခြင်း
-  // SystemChrome.setSystemUIOverlayStyle(
-  //   const SystemUiOverlayStyle(
-  //     statusBarColor:
-  //         Colors.transparent, // Status bar background ကို transparent လုပ်မည်
-  //     statusBarIconBrightness: Brightness.dark, // Default icon color
-  //   ),
-  // );
-
   await Utils.instance.init();
 
   await TWidgets.instance.init(
