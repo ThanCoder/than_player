@@ -3,7 +3,7 @@ import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/state/video/video_state.dart';
 import 'package:than_player/extensions/build_context_exts.dart';
 import 'package:than_player/main/components/video_folder_list_item.dart';
-import 'package:than_player/main/home/video/video_folder_list_page.dart';
+import 'package:than_player/main/home/video/video_folder_result_page.dart';
 
 class VideoFolderListStyleProvider extends StatelessWidget {
   final VideoState state;
@@ -27,7 +27,7 @@ class VideoFolderListStyleProvider extends StatelessWidget {
           onClicked: (folderName, files) {
             context.push(
               builder: (mainContext) =>
-                  VideoFolderListPage(title: name, files: files),
+                  VideoFolderResultPage(title: name, files: files),
             );
           },
         );

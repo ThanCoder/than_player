@@ -7,11 +7,13 @@ class VideoState {
   final bool isLoading;
   final List<VideoFile> list;
   final SortItem sortItem;
+  final Set<String> folderNames;
   const VideoState({
     required this.error,
     required this.isLoading,
     required this.list,
     required this.sortItem,
+    required this.folderNames,
   });
 
   factory VideoState.empty() {
@@ -20,20 +22,25 @@ class VideoState {
       isLoading: false,
       list: [],
       sortItem: SortItem.dateSortItem,
+      folderNames: {},
     );
   }
+
+  
 
   VideoState copyWith({
     String? error,
     bool? isLoading,
     List<VideoFile>? list,
     SortItem? sortItem,
+    Set<String>? folderNames,
   }) {
     return VideoState(
       error: error ?? this.error,
       isLoading: isLoading ?? this.isLoading,
       list: list ?? this.list,
       sortItem: sortItem ?? this.sortItem,
+      folderNames: folderNames ?? this.folderNames,
     );
   }
 }

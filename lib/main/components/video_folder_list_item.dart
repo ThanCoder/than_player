@@ -28,21 +28,15 @@ class VideoFolderListItem extends StatelessWidget {
           children: [
             SizedBox(width: 100, height: 100, child: thumbnail),
             Expanded(
-              child: Row(
+              child: Column(
+                spacing: 3,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    spacing: 3,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(folderName),
-                      Text('${files.length} Videos'),
-                      getAllSizeWidget,
-                      // Text(IntSizeLabelExtension(file.size).toFileSizeLabel()),
-                      // Text(file.date.formatDateTimeAgo()),
-                    ],
-                  ),
-                  Spacer(),
-                  IconButton(onPressed: () {}, icon: Icon(Icons.more_vert)),
+                  Text(folderName),
+                  Text('${files.length} Videos'),
+                  getAllSizeWidget,
+                  // Text(IntSizeLabelExtension(file.size).toFileSizeLabel()),
+                  // Text(file.date.formatDateTimeAgo()),
                 ],
               ),
             ),

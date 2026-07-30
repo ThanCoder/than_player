@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:than_player/core/utils/utils.dart';
 
 class VideoFile {
@@ -8,12 +9,12 @@ class VideoFile {
   final DateTime date;
   final int size;
   const VideoFile({
+    required this.id,
     required this.name,
     required this.path,
     required this.dirname,
     required this.date,
     required this.size,
-    required this.id,
   });
 
   String get cacheName {
@@ -22,6 +23,11 @@ class VideoFile {
 
   String get cachCoverPath {
     return Utils.instance.getCachePath(cacheName);
+  }
+
+  @override
+  String toString() {
+    return 'VideoFile(id: $id, name: $name, path: $path, dirname: $dirname, date: $date, size: $size)';
   }
 }
 

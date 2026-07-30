@@ -27,8 +27,12 @@ class ListStyleProvider extends StatefulWidget {
 
   static final valueNotifier = ValueNotifier<ListStyleType>(.list);
   static void init() {
-    final val = CFBStore.getInstance.getString('video-list-style-provider');
-    valueNotifier.value = ListStyleType.fromValue(val);
+    final val = ListStyleType.fromValue(
+      CFBStore.getInstance.getString('video-list-style-provider'),
+    );
+    if (valueNotifier.value != val) {
+      valueNotifier.value = val;
+    }
   }
 
   static void save() {

@@ -27,7 +27,11 @@ class _CacheManagerListTileState extends State<CacheManagerListTile> {
       future: Utils().getFolderInfo(Directory(widget.cacheDirPath)),
       builder: (context, snapshot) {
         if (snapshot.connectionState == .waiting) {
-          return Card(child: ListTile(title: Text('စစ်ဆေးနေပါတယ်.....')));
+          return Card(
+            child: ListTile(
+              title: Text('စစ်ဆေးနေပါတယ်.....', style: TextStyle(fontSize: 13)),
+            ),
+          );
         }
         final data = snapshot.data;
         if (data == null) return SizedBox.shrink();
@@ -40,6 +44,7 @@ class _CacheManagerListTileState extends State<CacheManagerListTile> {
             leading: Icon(Icons.cleaning_services_sharp),
             title: Text(
               'Cache: Count: ${data.$1} - Size: ${data.$2.fileSizeLabel()}',
+              style: TextStyle(fontSize: 13),
             ),
             onTap: _showCaleanConfirm,
           ),

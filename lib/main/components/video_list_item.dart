@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
-import 'package:than_pkg/than_pkg.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/utils/platform_utils.dart';
 import 'package:than_player/core/utils/utils.dart';

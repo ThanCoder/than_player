@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_pkg/than_pkg.dart';
+import 'package:than_player/core/const_keys.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 import 'package:than_player/extensions/build_context_exts.dart';
@@ -19,9 +20,16 @@ class AudioSliverList extends StatefulWidget {
 class _AudioSliverListState extends State<AudioSliverList> {
   @override
   Widget build(BuildContext context) {
-    return SliverList.builder(
+    // return SliverList.builder(
+    //   itemCount: widget.list.length,
+    //   itemBuilder: (context, index) => listItem(widget.list[index]),
+    // );
+    return SliverVariedExtentList.builder(
       itemCount: widget.list.length,
       itemBuilder: (context, index) => listItem(widget.list[index]),
+      itemExtentBuilder: (index, dimensions) {
+        return audioSliverListItemHeight;
+      },
     );
   }
 

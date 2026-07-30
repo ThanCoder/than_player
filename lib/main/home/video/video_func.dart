@@ -46,6 +46,23 @@ void showVideoContextItemMenu(BuildContext context, VideoFile file) {
           );
         },
       ),
+      ListTile(
+        leading: Icon(Icons.delete, color: Colors.red),
+        title: Text('Delete'),
+        onTap: () {
+          context.pop();
+          showTConfirmDialog(
+            context,
+            contentText: '`${file.name}`\nဖျက်ချင်တာသေချာပြီလား',
+            cancelText: 'No',
+            submitText: 'Yes',
+            onSubmit: () {
+              VideoStateController.instance.deleteVideo(file);
+              // VideoStateController.instance.removeVideoState(file);
+            },
+          );
+        },
+      ),
     ],
   );
 }

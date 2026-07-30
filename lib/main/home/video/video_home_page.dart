@@ -13,7 +13,7 @@ import 'package:than_player/core/utils/file_utils.dart';
 import 'package:than_player/main/home/video/video_folder_list_style_provider.dart';
 import 'package:than_player/main/home/video/video_func.dart';
 import 'package:than_player/main/home/video/video_list_style_provider.dart';
-import 'package:than_player/main/home/video_folder_type_provider.dart';
+import 'package:than_player/main/home/video/video_folder_type_provider.dart';
 import 'package:than_player/partials/list_style_provider.dart';
 import 'package:than_player/partials/sort_provider.dart';
 

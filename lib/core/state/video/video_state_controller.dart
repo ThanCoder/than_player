@@ -4,6 +4,7 @@ import 'package:cfb_store/cfb_store.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/services/video_file_services.dart';
 import 'package:than_player/core/state/video/video_state.dart';
+import 'package:than_player/core/state/video/video_state_events.dart';
 import 'package:than_player/core/utils/video_scanner.dart';
 import 'package:than_player/partials/sort_provider.dart';
 
@@ -11,6 +12,9 @@ class VideoStateController {
   static VideoStateController instance = VideoStateController._();
   VideoStateController._();
   factory VideoStateController() => instance;
+
+  final _eventController = StreamController<VideoStateEvent>.broadcast();
+  Stream<VideoStateEvent> get eventStream => _eventController.stream;
 
   final _controller = StreamController<VideoState>.broadcast();
   Stream<VideoState> get stateStream => _controller.stream;
@@ -51,7 +55,15 @@ class VideoStateController {
       //**************Sort End****************** */
 
       final list = await _scanner.scan();
-      _state = _state.copyWith(isLoading: false, list: list);
+      final folderNames = <String>{};
+      for (var file in list) {
+        folderNames.add(file.dirname);
+      }
+      _state = _state.copyWith(
+        isLoading: false,
+        list: list,
+        folderNames: folderNames,
+      );
       sort();
       _controller.add(_state);
     } catch (e) {
@@ -81,9 +93,38 @@ class VideoStateController {
     _controller.add(_state);
   }
 
+  //********************Video File******************** */
+  /// ### add -> State.
+  void addVideo(VideoFile newFile) {
+    _eventController.add(VideoStateAddEvent(newFile));
+    _state.list.add(newFile);
+    _controller.add(_state);
+  }
+
+  /// ### rename -> State.
+  void renameVideoState(VideoFile newFile) {
+    _eventController.add(VideoStateRenameEvent(newFile));
+    final index = state.list.indexWhere((e) => e.id == newFile.id);
+    if (index == -1) return;
+    _state.list[index] = newFile;
+    _controller.add(_state);
+  }
+
+  /// ### remove -> State.
+  void removeVideoState(VideoFile file) {
+    _eventController.add(VideoStateRemoveEvent(file));
+    final index = state.list.indexWhere(
+      (e) => e.id == file.id && e.name == file.name,
+    );
+    if (index == -1) return;
+    _state.list.removeAt(index);
+    _controller.add(_state);
+  }
+
   //********************Video File Services******************** */
   final VideoFileServices _fileService = VideoFileServices.instance;
 
+  /// ### delete -> State And Disk File!.
   Future<void> deleteVideo(VideoFile file) async {
     final isSuccess = await _fileService.deleteVideo(file);
 
@@ -94,12 +135,14 @@ class VideoStateController {
 
       _state = _state.copyWith(list: updatedList);
       _controller.add(_state);
+      _eventController.add(VideoStateRemoveEvent(file));
     } else {
       _state = _state.copyWith(error: 'Failed to delete file');
       _controller.add(_state);
     }
   }
 
+  /// ### rename -> State And Disk File!.
   Future<void> renameVideo(VideoFile file, String newName) async {
     final updatedVideo = await _fileService.renameVideo(file, newName);
 
@@ -112,6 +155,7 @@ class VideoStateController {
         _state = _state.copyWith(list: updatedList);
         sort(); // Sort ပြန်စီပေးရန် (လိုအပ်ပါက)
         _controller.add(_state);
+        _eventController.add(VideoStateRenameEvent(file));
       }
     } else {
       _state = _state.copyWith(error: 'Failed to rename file');

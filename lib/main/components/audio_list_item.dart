@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/audio_bookmark/audio_bookmark_button.dart';
 import 'package:than_player/core/models/audio_file.dart';
@@ -21,55 +22,78 @@ class AudioListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: AudioStateController().stateStream,
-      initialData: AudioStateController().state,
-      builder: (context, snapshot) {
-        final state = snapshot.data!;
-        return InkWell(
-          mouseCursor: SystemMouseCursors.click,
-          onTap: () => onClicked?.call(file),
-          onLongPress: () => onMenuClicked?.call(file),
-          onSecondaryTap: () => onMenuClicked?.call(file),
-          child: Container(
+    return InkWell(
+      mouseCursor: SystemMouseCursors.click,
+      onTap: () => onClicked?.call(file),
+      onLongPress: () => onMenuClicked?.call(file),
+      onSecondaryTap: () => onMenuClicked?.call(file),
+      child: StreamBuilder(
+        stream: AudioStateController().stateStream,
+        initialData: AudioStateController().state,
+        builder: (context, snapshot) {
+          final state = snapshot.data!;
+          return Container(
             margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Container(
-              decoration: BoxDecoration(
-                color: itemBackgroundColor(context, file),
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: itemBoxDecoration(context, file),
               child: Padding(
-                padding: const EdgeInsets.all(4.0),
+                padding: const EdgeInsets.all(2.0),
                 child: Row(
                   spacing: 4,
                   children: [
                     SizedBox(
-                      width: Platform.isAndroid ? 50 : 60,
+                      width: Platform.isAndroid ? 60 : 60,
                       height: Platform.isAndroid ? 50 : 60,
-                      child: stateWidget(state),
+                      child: leftWidget(state),
                     ),
                     Expanded(child: metaWidget),
                   ],
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
-  Color? itemBackgroundColor(BuildContext context, AudioFile file) {
-    if (AudioStateController.instance.isCurrentSong(file.id)) {
-      return Colors.teal;
+  BoxDecoration itemBoxDecoration(BuildContext context, AudioFile file) {
+    final isCurrent = AudioStateController.instance.isCurrentSong(file.id);
+    if (isCurrent) {
+      // return const Color.fromARGB(237, 1, 31, 27);
+      // 🔥 မီးလောင်နေတဲ့ / Fire Glow Style
+      return BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        // ရဲရဲတောက် မီးတောက် Gradient စပ်ထားခြင်း (Dark Red -> Deep Orange -> Fire Gold)
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF8B0000), // Dark Red
+            Color(0xFFFF4500), // Orange Red
+            Color(0xFFFFA500), // Flame Gold
+          ],
+        ),
+        // မီးရောင် မှိတ်တုတ်မှိတ်တုတ်/လင်းနေမယ့် Neon Glow Shadow
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF4500).withValues(alpha: 0.6),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      );
     } else {
-      return context.brightness.isDark
-          ? const Color.fromARGB(60, 0, 0, 0)
-          : const Color.fromARGB(88, 222, 222, 222);
+      return BoxDecoration(
+        color: context.brightness.isDark
+            ? const Color.fromARGB(205, 18, 13, 13)
+            : const Color.fromARGB(88, 222, 222, 222),
+      );
     }
   }
 
@@ -111,17 +135,26 @@ class AudioListItem extends StatelessWidget {
     );
   }
 
-  Widget stateWidget(AudioState state) {
+  Widget leftWidget(AudioState state) {
+    final isCurrent =
+        state.currentSong != null &&
+        state.currentSong!.id == file.id &&
+        state.isPlaying;
     return Stack(
       children: [
         Positioned.fill(child: coverWidget),
-        if (state.currentSong != null && state.currentSong!.id == file.name)
+        if (isCurrent) Container(color: Colors.black.withValues(alpha: .5)),
+        if (isCurrent)
           Positioned(
             bottom: 10,
             left: 0,
             right: 0,
-            child: Icon(
-              state.isPlaying ? Icons.play_circle : Icons.pause_circle,
+            child: LottieBuilder.asset(
+              'assets/lotties/Playing.lottie',
+              fit: BoxFit.fitHeight,
+              // Animation အမြဲပတ်နေစေရန်
+              repeat: true,
+              animate: true,
             ),
           ),
       ],

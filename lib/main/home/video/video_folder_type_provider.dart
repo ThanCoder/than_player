@@ -24,7 +24,9 @@ class VideoFolderTypeProvider extends StatefulWidget {
     final val = VideoFolderType.fromValue(
       CFBStore.getInstance.getString('video-folder-type'),
     );
-    valueNotifier.value = val;
+    if (valueNotifier.value != val) {
+      valueNotifier.value = val;
+    }
   }
 
   static void save(VideoFolderType value) {
@@ -35,6 +37,14 @@ class VideoFolderTypeProvider extends StatefulWidget {
 }
 
 class _VideoFolderTypeProviderState extends State<VideoFolderTypeProvider> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((e) {
+      VideoFolderTypeProvider.init();
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
@@ -51,8 +61,8 @@ class _VideoFolderTypeProviderState extends State<VideoFolderTypeProvider> {
                     title: Text("All Videos"),
                     value: value == .allVideo,
                     onChanged: (value) {
-                      VideoFolderTypeProvider.save(.allVideo);
                       context.pop();
+                      VideoFolderTypeProvider.save(.allVideo);
                     },
                   ),
                 ),
@@ -62,8 +72,8 @@ class _VideoFolderTypeProviderState extends State<VideoFolderTypeProvider> {
                     title: Text("All Folders"),
                     value: value == .allFolders,
                     onChanged: (value) {
-                      VideoFolderTypeProvider.save(.allFolders);
                       context.pop();
+                      VideoFolderTypeProvider.save(.allFolders);
                     },
                   ),
                 ),

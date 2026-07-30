@@ -90,4 +90,6 @@ class FileUtils {
     // Hash + File Size ကို ပေါင်းပြီး ဒုတိယအကြိမ် Hash ပြုလုပ်ခြင်း
     return sha1.convert(utf8.encode('${dig.toString()}-$fileSize')).toString();
   }
+
+  
 }
