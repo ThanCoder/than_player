@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dart_core_extensions/dart_core_extensions.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_taglib/flutter_taglib.dart';
 import 'package:mime/mime.dart';
 import 'package:than_player/core/utils/utils.dart';
@@ -26,33 +27,46 @@ class AudioMeta {
     final mm = lookupMimeType(path);
     format = mm;
     final file = TagLibFile.open(path);
-    if (file != null) {
-      if (file.title.isNotEmpty) {
-        title = file.title;
-      }
-      info = file.audioInfo;
-
-      if (file.album.isNotEmpty) {
-        album = file.album;
-      }
-      if (file.artist.isNotEmpty) {
-        artist = file.artist;
-      }
-      if (file.bitrateMode.isNotEmpty) {
-        bitrateMode = file.bitrateMode;
-      }
-      if (file.comment.isNotEmpty) {
-        comment = file.comment;
-      }
-      if (file.genre.isNotEmpty) {
-        genre = file.genre;
-      }
-      coverMimeType = file.coverMimeType;
-      hasCover = file.hasCover;
-      duration = file.duration;
-      // album = file.sampleRate;
-      file.close();
+    if (file == null) {
+      debugPrint('[Dev:AudioMeta:openMeta]: `TagLibFile.open` Error');
+      return;
     }
+    if (file.title.isNotEmpty) {
+      title = file.title;
+    }
+    info = file.audioInfo;
+
+    if (file.album.isNotEmpty) {
+      album = file.album;
+    }
+    if (file.artist.isNotEmpty) {
+      artist = file.artist;
+    }
+    if (file.bitrateMode.isNotEmpty) {
+      bitrateMode = file.bitrateMode;
+    }
+    if (file.comment.isNotEmpty) {
+      comment = file.comment;
+    }
+    if (file.genre.isNotEmpty) {
+      genre = file.genre;
+    }
+    coverMimeType = file.coverMimeType;
+    hasCover = file.hasCover;
+    if (Platform.isAndroid) {
+      // https://pub.dev/packages/flutter_taglib
+      //bugs ဖြစ်နေတာ
+      if (file.duration.inSeconds == 0 && file.duration.inMilliseconds > 0) {
+        duration = Duration(seconds: file.duration.inMilliseconds);
+      } else {
+        duration = file.duration;
+      }
+    } else {
+      duration = file.duration;
+    }
+    // print('Dev: duration: ${duration!}');
+    // album = file.sampleRate;
+    file.close();
   }
 
   String get formatDuration {

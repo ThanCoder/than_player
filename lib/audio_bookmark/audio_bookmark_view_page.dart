@@ -24,6 +24,7 @@ class _AudioBookmarkViewPageState extends State<AudioBookmarkViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(),
       body: StreamBuilder(
         stream: AudioStateController().stateStream,
@@ -31,10 +32,7 @@ class _AudioBookmarkViewPageState extends State<AudioBookmarkViewPage> {
           return Stack(
             children: [
               Positioned.fill(
-                bottom:
-                    AudioStateController.instance.state.showFloatingAudioWidget
-                    ? 70
-                    : 0,
+                bottom: 0,
                 child: CustomScrollView(
                   slivers: [
                     StreamBuilder(
@@ -56,6 +54,7 @@ class _AudioBookmarkViewPageState extends State<AudioBookmarkViewPage> {
                         );
                       },
                     ),
+                    SliverToBoxAdapter(child: SizedBox(height: 70)),
                   ],
                 ),
               ),

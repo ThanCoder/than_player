@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:than_player/audio_bookmark/audio_bookmark_controller.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 
 class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
@@ -35,12 +36,10 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   @override
   Future<void> play() async {
     await _player.play();
-    // await _startFade(targetVolume: 1.0, duration: Duration(milliseconds: 1000));
   }
 
   @override
   Future<void> pause() async {
-    // await _startFade(targetVolume: 0.0, duration: Duration(milliseconds: 1000));
     await _player.pause();
   }
 
@@ -60,11 +59,23 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   @override
+  Future<dynamic> customAction(String name, [Map<String, dynamic>? extras]) {
+    final current = AudioStateController.instance.currentAudioFile;
+    if (name == 'favorite' && current != null) {
+      AudioBookmarkController.instance.remove(current.id);
+    }
+    if (name == 'favorite_outline' && current != null) {
+      AudioBookmarkController.instance.add(current.id);
+    }
+
+    return super.customAction(name, extras);
+  }
+
+  @override
   Future<void> stop() async {
     await _player.pause();
     await seek(Duration(seconds: 0));
 
-    // ၂။ audio_service ကို ရပ်လိုက်ပြီဖြစ်ကြောင်း အရင် အသိပေးပါ (System ကို အရင်ရှင်းတာ)
     playbackState.add(
       playbackState.value.copyWith(
         processingState: AudioProcessingState.idle,
@@ -76,7 +87,6 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     await super.stop();
   }
 
-  // 💡 ပြင်ဆင်ချက် ၃: Parameter ထဲက PlaybackEvent ကို ဖြုတ်လိုက်ပြီး _player ရဲ့ လက်ရှိ state အစစ်ကို တိုက်ရိုက်ယူခိုင်းလိုက်ပါတယ်
   PlaybackState _transformEvent() {
     return PlaybackState(
       controls: [
@@ -84,6 +94,18 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         if (_player.playing) MediaControl.pause else MediaControl.play,
         MediaControl.skipToNext,
         MediaControl.stop,
+        if (AudioStateController.instance.currentSongBookmarked)
+          MediaControl.custom(
+            androidIcon: "drawable/favorite",
+            label: 'Favorite',
+            name: 'favorite',
+          )
+        else
+          MediaControl.custom(
+            androidIcon: "drawable/favorite_outline",
+            label: 'UnFavorite',
+            name: 'favorite_outline',
+          ),
       ],
       systemActions: const {
         MediaAction.seek,
@@ -107,41 +129,4 @@ class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       queueIndex: _player.currentIndex,
     );
   }
-
-  //***********Fade Effect************ */
-  // 💡 Fade ကို ထိန်းချုပ်ဖို့ Timer တစ်ခု သတ်မှတ်မယ်
-  // Timer? _fadeTimer;
-
-  // ... (Constructor တွေ ရှိပြီးသားအတိုင်း ထားပါ)
-
-  // 💡 ဒါက အသံကို တုန်မသွားစေဘဲ ပုရွက်ဆိတ်လျှောက်သလို ညင်သာအောင် အသံညှိပေးမယ့် Master Function ပါ
-  // Future<void> _startFade({
-  //   required double targetVolume,
-  //   required Duration duration,
-  // }) async {
-  //   _fadeTimer?.cancel(); // လည်နေတဲ့ အဟောင်းရှိရင် အရင်သတ်မယ်
-
-  //   final int steps = 20;
-  //   final int interval = duration.inMilliseconds ~/ steps;
-  //   final double startVolume = _player.volume;
-  //   final double volumeDiff = targetVolume - startVolume;
-  //   int currentStep = 0;
-
-  //   _fadeTimer = Timer.periodic(Duration(milliseconds: interval), (
-  //     timer,
-  //   ) async {
-  //     currentStep++;
-  //     final double newVolume =
-  //         startVolume + (volumeDiff * (currentStep / steps));
-
-  //     // Target ရောက်ရင် ရပ်မယ်
-  //     if (currentStep >= steps) {
-  //       await _player.setVolume(targetVolume);
-  //       timer.cancel();
-  //     } else {
-  //       await _player.setVolume(newVolume);
-  //     }
-  //   });
-  //   await Future.delayed(duration);
-  // }
 }

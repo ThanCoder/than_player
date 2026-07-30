@@ -155,7 +155,9 @@ class _AudioHomePageState extends State<AudioHomePage> {
           return Center(child: TLoaderRandom());
         }
         if (state.list.isEmpty) {
-          return RefreshButton(text: Text('Refersh'), onClicked: init);
+          return Center(
+            child: RefreshButton(text: Text('Refersh'), onClicked: init),
+          );
         }
         return RefreshIndicator.adaptive(
           onRefresh: init,
@@ -171,6 +173,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
                   AudioStateController.instance.playTrack(file);
                 },
               ),
+              SliverToBoxAdapter(child: SizedBox(height: 70)),
             ],
           ),
         );
