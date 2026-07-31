@@ -250,28 +250,46 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
   }
 
   Widget marqueeWidget(String title) {
-    return SizedBox(
-      height: 32, // Marquee သုံးရင် height အသေတစ်ခု ပေးရပါမယ်
-      child: Marquee(
-        text: title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-        ),
-        scrollAxis: Axis.horizontal, // ဘေးတိုက်ရွေ့မည်
-        crossAxisAlignment: CrossAxisAlignment.start,
-        blankSpace: 50.0, // စာတန်းအဆုံးနဲ့ အစ ပြန်မစခင် ကြားကအကွာအဝေး
-        velocity: 30.0, // စာလုံး ပြေးမယ့်အရှိန် (များရင် ပိုမြန်တယ်)
-        pauseAfterRound: const Duration(
-          seconds: 2,
-        ), // စာတစ်ခေါက်ပြီးရင် ၂ စက္ကန့် ခဏရပ်မည်
-        startPadding: 10.0,
-        accelerationDuration: const Duration(seconds: 1),
-        accelerationCurve: Curves.linear,
-        decelerationDuration: const Duration(milliseconds: 500),
-        decelerationCurve: Curves.easeOut,
-      ),
+    return StreamBuilder(
+      stream: AudioStateController.instance.stateStream,
+      builder: (context, asyncSnapshot) {
+        if (!AudioStateController.instance.state.isPlaying) {
+          return Center(
+            child: Text(
+              title,
+              maxLines: 2,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        }
+        return SizedBox(
+          height: 32, // Marquee သုံးရင် height အသေတစ်ခု ပေးရပါမယ်
+          child: Marquee(
+            text: title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+            scrollAxis: Axis.horizontal, // ဘေးတိုက်ရွေ့မည်
+            crossAxisAlignment: CrossAxisAlignment.start,
+            blankSpace: 50.0, // စာတန်းအဆုံးနဲ့ အစ ပြန်မစခင် ကြားကအကွာအဝေး
+            velocity: 30.0, // စာလုံး ပြေးမယ့်အရှိန် (များရင် ပိုမြန်တယ်)
+            pauseAfterRound: const Duration(
+              seconds: 2,
+            ), // စာတစ်ခေါက်ပြီးရင် ၂ စက္ကန့် ခဏရပ်မည်
+            startPadding: 10.0,
+            accelerationDuration: const Duration(seconds: 1),
+            accelerationCurve: Curves.linear,
+            decelerationDuration: const Duration(milliseconds: 500),
+            decelerationCurve: Curves.easeOut,
+          ),
+        );
+      },
     );
   }
 }

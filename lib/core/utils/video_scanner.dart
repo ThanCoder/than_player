@@ -3,24 +3,12 @@ import 'dart:isolate';
 
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:mime/mime.dart';
+import 'package:than_player/core/const_keys.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/utils/file_utils.dart';
 import 'package:than_player/core/utils/platform_utils.dart';
 
 class VideoScanner {
-  static const videoExtensions = {
-    'mp4',
-    'mkv',
-    'avi',
-    'mov',
-    'flv',
-    'wmv',
-    'webm',
-    'm4v',
-    '3gp',
-  };
-
   Future<List<VideoFile>> scan({List<String>? rootPath}) async {
     var roots = rootPath ?? await PlatformUtils.getScanRootPath();
 
@@ -61,13 +49,12 @@ class VideoScanner {
 
   static VideoFile? processEntry(FileSystemEntity entry, String name) {
     try {
-      final size = entry.file.lengthSync();
-      // 1mb အောက် မလိုဘူး
-      if (size < 1024 * 1024) return null;
+      final len = entry.size;
+      // 500kb အောက်ဆိုရင် မသုံးဘူး
+      if (len == 0 || len < (1024 * 500)) return null;
+      final lower = name.toLowerCase();
 
-      final mm = lookupMimeType(entry.path);
-      if (mm == null) return null;
-      if (!mm.startsWith('video')) {
+      if (!videoSupportedExtensions.any(lower.endsWith)) {
         return null;
       }
       return VideoFile(

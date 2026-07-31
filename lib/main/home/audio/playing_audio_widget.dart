@@ -111,7 +111,7 @@ class PlayingAudioWidget extends StatelessWidget {
           height: 20,
           child: Marquee(
             text: meta.title ?? audioFile.name,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
           ),
         )
       else

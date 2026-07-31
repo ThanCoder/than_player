@@ -5,6 +5,7 @@ import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:than_pkg_android/than_pkg_android.dart';
 import 'package:than_player/extensions/str_exts.dart';
 
 class Utils {
@@ -15,17 +16,31 @@ class Utils {
   late String cachePath;
   late String configPath;
   late PackageInfo packageInfo;
+  late String androidRootDirPath;
 
   Future<void> init() async {
-    final cacheDir = await getApplicationCacheDirectory();
-    final configDir = await getApplicationSupportDirectory();
-    cachePath = cacheDir.path;
-    final cfDir = Directory(configDir.path.join('config'));
-    if (!cfDir.existsSync()) {
-      cfDir.createSync();
+    try {
+      final cacheDir = await getApplicationCacheDirectory();
+      final configDir = await getApplicationSupportDirectory();
+
+      cachePath = cacheDir.path;
+      final cfDir = Directory(configDir.path.join('config'));
+      if (!cfDir.existsSync()) {
+        cfDir.createSync();
+      }
+      configPath = cfDir.path;
+      packageInfo = await PackageInfo.fromPlatform();
+
+      if (Platform.isAndroid) {
+        final path = ThanPkgAndroid.getInstance.pathHandler
+            .getDeviceStoragePath();
+        androidRootDirPath = PathBuf(
+          path,
+        ).join('.${packageInfo.packageName}').path;
+      }
+    } catch (e) {
+      debugPrint('[Utils:init]: $e');
     }
-    configPath = cfDir.path;
-    packageInfo = await PackageInfo.fromPlatform();
   }
 
   String getCachePath([String? name]) {
@@ -36,6 +51,24 @@ class Utils {
   String getConfigPath([String? name]) {
     if (name == null) return configPath;
     return configPath.join(name);
+  }
+
+  String getExternalConfigPath([String? name]) {
+    var root = configPath;
+    try {
+      if (Platform.isAndroid) {
+        final dir = PathBuf(androidRootDirPath).join('config').directory;
+        if (!dir.existsSync()) {
+          dir.createSync(recursive: true);
+        }
+        root = dir.path;
+      }
+    } catch (e) {
+      debugPrint('[Utils:getExternalConfigPath]: $e');
+    }
+    if (name == null) return root;
+
+    return root.join(name);
   }
 
   /// ### Return -> [(count,size)]
@@ -72,18 +105,3 @@ class Utils {
     });
   }
 }
-
-// extension FormatTime on Duration {
-//   String formatTimeLable() {
-//     final hours = inHours.toString().padLeft(2, '0');
-//     final mins = (inMinutes % 60).toString().padLeft(2, '0');
-//     final secs = (inSeconds % 60).toString().padLeft(2, '0');
-
-//     // ၁ နာရီ သို့မဟုတ် အထက်ရှိမှ Hour ကို ရှေ့က ထည့်ပြမည်
-//     if (inHours > 0) {
-//       return '$hours:$mins:$secs';
-//     }
-
-//     return '$mins:$secs';
-//   }
-// }

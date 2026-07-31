@@ -59,11 +59,11 @@ class _AudioSeekerWidgetState extends State<AudioSeekerWidget> {
                     seekerRangeChanged
                         ? Duration(
                             milliseconds: seekerValue.toInt(),
-                          ).formatTimeLable()
-                        : cur.formatTimeLable(),
+                          ).formatClockLabel()
+                        : cur.formatClockLabel(),
                   ),
                   Spacer(),
-                  Text(dur.formatTimeLable()),
+                  Text(dur.formatClockLabel()),
                 ],
               ),
             ),

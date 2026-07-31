@@ -26,7 +26,8 @@ dependencies:
   package_info_plus: ^10.2.0
   marquee: ^2.3.0
   crypto: ^3.0.7
-  cfb_store: ^0.4.0
+  cfb_store:
+    path: /home/thancoder/projects/dart_plugins/cfb_store_dart
   screen_brightness: ^2.1.11
   than_pkg_linux: ^0.0.1
   than_pkg_android: ^0.2.1

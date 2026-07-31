@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -5,11 +6,26 @@ import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_taglib/flutter_taglib.dart';
 import 'package:mime/mime.dart';
+
 import 'package:than_player/core/utils/utils.dart';
 
 class AudioMeta {
   final String path;
-  AudioMeta(this.path);
+  AudioMeta(
+    this.path, {
+    this.album,
+    this.artist,
+    this.bitrate,
+    this.bitrateMode,
+    this.comment,
+    this.coverMimeType,
+    this.duration,
+    this.format,
+    this.genre,
+    this.hasCover = false,
+    this.sampleRate,
+    this.title,
+  });
 
   String? album;
   String? title;
@@ -18,10 +34,47 @@ class AudioMeta {
   String? coverMimeType;
   String? bitrateMode;
   String? genre;
-  bool hasCover = false;
+  bool hasCover;
   Duration? duration;
-  AudioInfo? info;
   String? format;
+  int? bitrate;
+  int? sampleRate;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'path': path,
+      'album': album ?? '',
+      'title': title ?? '',
+      'artist': artist ?? '',
+      'comment': comment ?? '',
+      'coverMimeType': coverMimeType ?? '',
+      'genre': genre ?? '',
+      'bitrateMode': bitrateMode ?? 0,
+      'hasCover': hasCover,
+      'duration': duration!.inMilliseconds,
+      'format': format ?? '',
+      'bitrate': bitrate ?? 0,
+      'sampleRate': sampleRate ?? 0,
+    };
+  }
+
+  factory AudioMeta.fromMap(Map<String, dynamic> map) {
+    return AudioMeta(
+      map['path'],
+      album: map['album'],
+      title: map['title'],
+      artist: map['artist'],
+      comment: map['comment'],
+      coverMimeType: map['coverMimeType'],
+      bitrateMode: map['bitrateMode'],
+      genre: map['genre'],
+      hasCover: map['hasCover'],
+      duration: Duration(milliseconds: map['duration'] ?? 0),
+      format: map['format'],
+      bitrate: map['bitrate'],
+      sampleRate: map['sampleRate'],
+    );
+  }
 
   void openMeta() {
     final mm = lookupMimeType(path);
@@ -34,7 +87,8 @@ class AudioMeta {
     if (file.title.isNotEmpty) {
       title = file.title;
     }
-    info = file.audioInfo;
+    bitrate = file.audioInfo.bitrate;
+    sampleRate = file.audioInfo.sampleRate;
 
     if (file.album.isNotEmpty) {
       album = file.album;
@@ -85,15 +139,15 @@ class AudioMeta {
   }
 
   String get bitrateLabel {
-    if (info != null) {
-      return '${info!.bitrate} kb/s';
+    if (bitrate != null) {
+      return '$bitrate kb/s';
     }
     return '';
   }
 
   String get sampleRateLabel {
-    if (info != null) {
-      return '${info!.sampleRate / 1000} kHz';
+    if (sampleRate != null) {
+      return '${sampleRate! / 1000} kHz';
     }
     return '';
   }
@@ -117,4 +171,7 @@ class AudioMeta {
     }
     return cacheFile.path;
   }
+
+  @override
+  String toString() => 'AudioMeta(path: $path)';
 }

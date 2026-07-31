@@ -36,9 +36,14 @@ class _AudioHomePageState extends State<AudioHomePage> {
     }
     songListController.addListener(_onScrollAndCheckJumpButton);
 
-    // AudioStateController.instance.stateStream.listen((_) {
-
-    // });
+    AudioStateController.instance.stateStream.listen((_) {
+      _onScrollAndCheckJumpButton();
+    });
+    CFBStore.getInstance.events.listen((event) {
+      if (event is PutValue) {
+        _onScrollAndCheckJumpButton();
+      }
+    });
   }
 
   @override
@@ -63,7 +68,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
         await ThanPkg.platform.requestStoragePermission();
         return;
       }
-      await AllAudioStateController.instance.scanAudioListFromStorage();
+      await AllAudioStateController.instance.scanAudioListFromStorageAndCache();
       isCalled = true;
       setState(() {});
     } catch (e) {
@@ -72,13 +77,17 @@ class _AudioHomePageState extends State<AudioHomePage> {
     }
   }
 
+  //******************Current Item ကို ပြန်ပေးတဲ့ button************************** */
   double? viewportHeight;
   void _onScrollAndCheckJumpButton() {
     if (!AudioCurrentJumpWidget.enableNotifier.value) {
       AudioCurrentJumpWidget.enableNotifier.value = true;
     }
     if (viewportHeight != null) {
-      final index = AudioStateController.instance.currentSongIndex;
+      if (AudioStateController.instance.currentAudioFile == null) return;
+
+      final id = AudioStateController.instance.currentAudioFile!.id;
+      final index = AllAudioStateController.instance.getSongIndexById(id);
       if (index == -1) return;
 
       final firstVisibleIndex =
@@ -97,7 +106,10 @@ class _AudioHomePageState extends State<AudioHomePage> {
   }
 
   void showCurrentItem() {
-    final index = AudioStateController.instance.currentSongIndex;
+    if (AudioStateController.instance.currentAudioFile == null) return;
+
+    final id = AudioStateController.instance.currentAudioFile!.id;
+    final index = AllAudioStateController.instance.getSongIndexById(id);
     final offset = (index * audioSliverListItemHeight) - 100;
     // print('index: $index - offset: $offset');
 
@@ -108,6 +120,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
       ),
     );
   }
+  //******************Current Item ကို ပြန်ပေးတဲ့ button************************** */
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +141,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
                           IconButton(
                             onPressed: AllAudioStateController
                                 .instance
-                                .scanAudioListFromStorage,
+                                .scanAudioListFromStorageAndCache,
                             icon: Icon(Icons.refresh),
                           ),
                       ],

@@ -1,7 +1,9 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dart_core_extensions/dart_core_extensions.dart';
+
 import 'package:than_player/core/models/audio_meta.dart';
 import 'package:than_player/core/utils/utils.dart';
 
@@ -19,7 +21,8 @@ class AudioFile {
     required this.path,
     required this.dirname,
     required this.date,
-    required this.meta, required this.size,
+    required this.meta,
+    required this.size,
   });
   String get cacheName {
     final digest = md5.convert(utf8.encode(name.onlyName));
@@ -28,6 +31,30 @@ class AudioFile {
 
   String get cachCoverPath {
     return Utils.instance.getCachePath(cacheName);
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'name': name,
+      'id': id,
+      'path': path,
+      'dirname': dirname,
+      'date': date.millisecondsSinceEpoch,
+      'meta': meta.toMap(),
+      'size': size,
+    };
+  }
+
+  factory AudioFile.fromMap(Map<String, dynamic> map) {
+    return AudioFile(
+      name: map['name'] as String,
+      id: map['id'] as String,
+      path: map['path'] as String,
+      dirname: map['dirname'] as String,
+      date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
+      meta: AudioMeta.fromMap(map['meta'] as Map<String, dynamic>),
+      size: map['size'] as int,
+    );
   }
 }
 

@@ -17,7 +17,7 @@ class _AudioBookmarkViewPageState extends State<AudioBookmarkViewPage> {
   void initState() {
     super.initState();
     if (AllAudioStateController.instance.state.list.isEmpty) {
-      AllAudioStateController.instance.scanAudioListFromStorage();
+      AllAudioStateController.instance.scanAudioListFromStorageAndCache();
     }
   }
 

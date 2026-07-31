@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:t_widgets/t_widgets.dart';
@@ -41,15 +39,11 @@ class AudioListItem extends StatelessWidget {
             child: Container(
               decoration: itemBoxDecoration(context, file),
               child: Padding(
-                padding: const EdgeInsets.all(2.0),
+                padding: const EdgeInsets.all(1.0),
                 child: Row(
                   spacing: 4,
                   children: [
-                    SizedBox(
-                      width: Platform.isAndroid ? 60 : 60,
-                      height: Platform.isAndroid ? 50 : 60,
-                      child: leftWidget(state),
-                    ),
+                    SizedBox(width: 100, height: 60, child: leftWidget(state)),
                     Expanded(child: metaWidget),
                   ],
                 ),
@@ -90,6 +84,7 @@ class AudioListItem extends StatelessWidget {
       );
     } else {
       return BoxDecoration(
+        borderRadius: .circular(12),
         color: context.brightness.isDark
             ? const Color.fromARGB(205, 18, 13, 13)
             : const Color.fromARGB(88, 222, 222, 222),
@@ -101,14 +96,14 @@ class AudioListItem extends StatelessWidget {
     final meta = file.meta;
 
     return Column(
-      spacing: 1,
+      spacing: 0,
       crossAxisAlignment: .start,
       children: [
         Text(
           file.name,
-          maxLines: Platform.isAndroid ? 1 : 2,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
         ),
         Row(
           children: [
@@ -126,7 +121,7 @@ class AudioListItem extends StatelessWidget {
           ],
         ),
         // audio info
-        if (meta.info != null)
+        if (meta.bitrate != null && meta.sampleRate != null)
           Text(
             '${meta.formatLabel} * ${meta.bitrateLabel} * ${meta.sampleRateLabel}',
             style: TextStyle(fontSize: 11),
@@ -146,7 +141,7 @@ class AudioListItem extends StatelessWidget {
         if (isCurrent) Container(color: Colors.black.withValues(alpha: .5)),
         if (isCurrent)
           Positioned(
-            bottom: 10,
+            bottom: -10,
             left: 0,
             right: 0,
             child: LottieBuilder.asset(
@@ -169,7 +164,7 @@ class AudioListItem extends StatelessWidget {
           return Center(child: TLoader());
         }
         final cachePath = snapshot.data!;
-        return TImageFile(path: cachePath);
+        return TImageFile(path: cachePath, fit: .cover);
       },
     );
   }

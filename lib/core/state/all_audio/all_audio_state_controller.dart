@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:cfb_store/cfb_store.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/all_audio/all_audio_state.dart';
 import 'package:than_player/core/utils/audio_scanner.dart';
+import 'package:than_player/main/home/audio/audio_cache_list_controller.dart';
 import 'package:than_player/partials/sort_provider.dart';
 
 class AllAudioStateController {
@@ -22,7 +24,7 @@ class AllAudioStateController {
     SortItem.sizeSortItem,
   ];
   final _scanner = AudioScanner();
-  Future<void> scanAudioListFromStorage() async {
+  Future<void> scanAudioListFromStorageAndCache() async {
     try {
       SortItem sortItem = sortList[1];
       final recentSortId = CFBStore.getInstance.getInt(
@@ -41,12 +43,29 @@ class AllAudioStateController {
       _state = _state.copyWith(isLoading: true, list: [], sortItem: sortItem);
       _controller.add(_state);
 
-      final list = await _scanner.scan();
+      var list = <AudioFile>[];
+      AudioCacheListController.instance.setList(list);
+      if (list.isEmpty) {
+        list = await _scanner.scan();
+        AudioCacheListController.instance.addCacheList(list);
+      }
+
       _state = _state.copyWith(isLoading: false, list: list);
       sort();
       _controller.add(_state);
+      await scanAudioListFromBackgroundStorage();
     } catch (e) {
       _state = _state.copyWith(error: e.toString(), isLoading: false);
+      _controller.add(_state);
+    }
+  }
+
+  Future<void> scanAudioListFromBackgroundStorage() async {
+    final list = await _scanner.scan();
+    debugPrint('[background fetched]: len ${list.length}');
+    if (list.length != state.list.length) {
+      _state = _state.copyWith(isLoading: false, list: list);
+      sort();
       _controller.add(_state);
     }
   }
@@ -70,5 +89,9 @@ class AllAudioStateController {
     _state = _state.copyWith(sortItem: item);
     sort();
     _controller.add(_state);
+  }
+
+  int getSongIndexById(String id) {
+    return state.list.indexWhere((e) => e.id == id);
   }
 }

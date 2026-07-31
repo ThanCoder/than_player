@@ -76,10 +76,9 @@ packages:
   cfb_store:
     dependency: "direct main"
     description:
-      name: cfb_store
-      sha256: e67f8382861e6d36de39d9a4390c5b6a3e759c7b9414adfd70cded3f94912870
-      url: "https://pub.dev"
-    source: hosted
+      path: "/home/thancoder/projects/dart_plugins/cfb_store_dart"
+      relative: false
+    source: path
     version: "0.4.0"
   change_app_package_name:
     dependency: "direct dev"

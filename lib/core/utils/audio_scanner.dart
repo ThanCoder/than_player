@@ -5,7 +5,7 @@ import 'dart:isolate';
 
 import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mime/mime.dart';
+import 'package:than_player/core/const_keys.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/models/audio_meta.dart';
 import 'package:than_player/core/utils/file_utils.dart';
@@ -21,10 +21,14 @@ class AudioScanner {
       AudioFile? processEntry(FileSystemEntity entry, String name) {
         try {
           // 500 KB အောက် မထည့်ဘူး (1024 * 500)
-          if (entry.size < (1024 * 500)) return null;
+          // if (entry.size < (1024 * 500)) return null;
+          
 
-          final mm = lookupMimeType(entry.path);
-          if (mm == null || !mm.startsWith('audio')) return null;
+          final lower = name.toLowerCase();
+
+          if (!audioSupportedExtensions.any(lower.endsWith)) {
+            return null;
+          }
 
           final meta = AudioMeta(entry.path);
           meta.openMeta();
