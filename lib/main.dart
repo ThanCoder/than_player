@@ -18,21 +18,21 @@ void main() async {
     defaultImageAssetsPath: 'assets/images/logos/logo.png',
   );
 
-  // or, if you want to manually configure enabled platforms instead:
-  // make sure to include the required dependency in pubspec.yaml for
-  // each enabled platform!
-  JustAudioMediaKit.ensureInitialized(
-    linux: true, // default: true  - dependency: media_kit_libs_linux
-    android: true, // default: false - dependency: media_kit_libs_android_audio
-  );
+  JustAudioMediaKit.ensureInitialized(linux: true, android: true);
   await AudioStateController.instance.init();
 
   await CFBStore.getInstance.open(
     Utils.instance.getConfigPath('config.store.cfb'),
   );
-  await AudioBookmarkController.instance.init();
-  await VideoBookmarkController.instance.init();
-  await VideoConfigServices.instance.init();
+  await AudioBookmarkController.instance.init(
+    Utils.instance.getConfigPath('audio-bookmark-id-list.cbf'),
+  );
+  await VideoBookmarkController.instance.init(
+    Utils.instance.getConfigPath('video-bookmark-id-list.cbf'),
+  );
+  await VideoConfigServices.instance.init(
+    Utils.instance.getConfigPath('video-config.cfb'),
+  );
 
   runApp(const MainApp());
 }

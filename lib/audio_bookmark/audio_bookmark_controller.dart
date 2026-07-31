@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cfb_store/cfb_store.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/all_audio/all_audio_state_controller.dart';
-import 'package:than_player/core/utils/utils.dart';
 
 class AudioBookmarkController {
   static AudioBookmarkController instance = AudioBookmarkController._();
@@ -15,11 +14,9 @@ class AudioBookmarkController {
   final _controller = StreamController<String>.broadcast();
   Stream<String> get stream => _controller.stream;
 
-  Future<void> init() async {
+  Future<void> init(String path) async {
     list.clear();
-    await _store.open(
-      Utils.instance.getConfigPath('audio-bookmark-id-list.cbf'),
-    );
+    await _store.open(path);
     list.addAll(_store.getStringList('list'));
     _controller.add('');
   }

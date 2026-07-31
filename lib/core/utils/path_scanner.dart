@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:than_pkg/than_pkg.dart';
+import 'package:than_player/extensions/str_exts.dart';
 
 abstract class PathScanner<T> {
   @protected

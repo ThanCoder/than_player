@@ -21,36 +21,11 @@ class VideoScanner {
     '3gp',
   };
 
-  Future<List<VideoFile>> scan() async {
-    final roots = await PlatformUtils.getScanRootPath();
+  Future<List<VideoFile>> scan({List<String>? rootPath}) async {
+    var roots = rootPath ?? await PlatformUtils.getScanRootPath();
 
     return await Isolate.run(() {
       List<VideoFile> list = [];
-
-      VideoFile? processEntry(FileSystemEntity entry, String name) {
-        try {
-          final size = entry.file.lengthSync();
-          // 1mb အောက် မလိုဘူး
-          if (size < 1024 * 1024) return null;
-
-          final mm = lookupMimeType(entry.path);
-          if (mm == null) return null;
-          if (!mm.startsWith('video')) {
-            return null;
-          }
-          return VideoFile(
-            id: FileUtils.getFileIdSync(entry.path),
-            name: name,
-            path: entry.path,
-            dirname: entry.parent.onlyName,
-            date: entry.modifiedDate,
-            size: entry.size,
-          );
-        } catch (e) {
-          debugPrint('Dev: [VideoScanner:processEntry]: $e');
-          return null;
-        }
-      }
 
       for (var path in roots) {
         final dirs = <Directory>[Directory(path)];
@@ -82,5 +57,30 @@ class VideoScanner {
 
       return list;
     });
+  }
+
+  static VideoFile? processEntry(FileSystemEntity entry, String name) {
+    try {
+      final size = entry.file.lengthSync();
+      // 1mb အောက် မလိုဘူး
+      if (size < 1024 * 1024) return null;
+
+      final mm = lookupMimeType(entry.path);
+      if (mm == null) return null;
+      if (!mm.startsWith('video')) {
+        return null;
+      }
+      return VideoFile(
+        id: FileUtils.getFileIdSync(entry.path),
+        name: name,
+        path: entry.path,
+        dirname: entry.parent.onlyName,
+        date: entry.modifiedDate,
+        size: entry.size,
+      );
+    } catch (e) {
+      debugPrint('Dev: [VideoScanner:processEntry]: $e');
+      return null;
+    }
   }
 }

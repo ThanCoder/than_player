@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:than_pkg/than_pkg.dart';
 import 'package:than_pkg_android/than_pkg_android.dart';
+import 'package:than_player/extensions/str_exts.dart';
 
 class PlatformUtils {
   static Future<bool> genVideoThumbnail(

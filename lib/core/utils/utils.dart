@@ -5,6 +5,7 @@ import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:than_player/extensions/str_exts.dart';
 
 class Utils {
   static Utils instance = Utils._();
@@ -72,17 +73,17 @@ class Utils {
   }
 }
 
-extension FormatTime on Duration {
-  String formatTimeLable() {
-    final hours = inHours.toString().padLeft(2, '0');
-    final mins = (inMinutes % 60).toString().padLeft(2, '0');
-    final secs = (inSeconds % 60).toString().padLeft(2, '0');
+// extension FormatTime on Duration {
+//   String formatTimeLable() {
+//     final hours = inHours.toString().padLeft(2, '0');
+//     final mins = (inMinutes % 60).toString().padLeft(2, '0');
+//     final secs = (inSeconds % 60).toString().padLeft(2, '0');
 
-    // ၁ နာရီ သို့မဟုတ် အထက်ရှိမှ Hour ကို ရှေ့က ထည့်ပြမည်
-    if (inHours > 0) {
-      return '$hours:$mins:$secs';
-    }
+//     // ၁ နာရီ သို့မဟုတ် အထက်ရှိမှ Hour ကို ရှေ့က ထည့်ပြမည်
+//     if (inHours > 0) {
+//       return '$hours:$mins:$secs';
+//     }
 
-    return '$mins:$secs';
-  }
-}
+//     return '$mins:$secs';
+//   }
+// }

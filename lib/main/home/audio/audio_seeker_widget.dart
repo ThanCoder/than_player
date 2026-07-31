@@ -1,6 +1,6 @@
+import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
-import 'package:than_player/core/utils/utils.dart';
 
 class AudioSeekerWidget extends StatefulWidget {
   const AudioSeekerWidget({super.key});

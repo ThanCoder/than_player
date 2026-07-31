@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/utils/platform_utils.dart';
-import 'package:than_player/core/utils/utils.dart';
 import 'package:than_player/video_bookmark/video_bookmark_button.dart';
 import 'package:than_player/video_config/video_config.dart';
 

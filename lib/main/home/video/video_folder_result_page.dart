@@ -7,7 +7,7 @@ import 'package:t_widgets/t_widgets.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/state/video/video_state_controller.dart';
 import 'package:than_player/core/state/video/video_state_events.dart';
-import 'package:than_player/core/utils/file_utils.dart';
+import 'package:than_player/core/utils/video_scanner.dart';
 import 'package:than_player/main/home/video/video_list_style_provider.dart';
 import 'package:than_player/partials/list_style_provider.dart';
 
@@ -80,19 +80,10 @@ class _VideoFolderResultPageState extends State<VideoFolderResultPage> {
       });
 
       await for (var file in dir.list(followLinks: false, recursive: false)) {
-        if (file is File) {
-          final videoId = await FileUtils.getFileId(file.path);
-          scanedFiles.add(
-            .new(
-              name: file.getName(),
-              path: file.path,
-              dirname: file.parentPath.getName(),
-              date: file.modifiedDate,
-              size: file.size,
-              id: videoId,
-            ),
-          );
-        }
+        if (file is! File) continue;
+        final v = VideoScanner.processEntry(file, file.name);
+        if (v == null) continue;
+        scanedFiles.add(v);
       }
 
       if (!mounted) return;

@@ -1,6 +1,5 @@
 import 'package:cfb_store/cfb_store.dart';
 import 'package:than_player/core/utils/platform_utils.dart';
-import 'package:than_player/core/utils/utils.dart';
 import 'package:than_player/video_config/video_config.dart';
 
 class VideoConfigServices {
@@ -9,8 +8,8 @@ class VideoConfigServices {
   factory VideoConfigServices() => instance;
   final _store = CFBStore();
 
-  Future<void> init() async {
-    await _store.open(Utils.instance.getConfigPath('video-config.cfb'));
+  Future<void> init(String path) async {
+    await _store.open(path);
   }
 
   int getCurrentPosition(String id) {

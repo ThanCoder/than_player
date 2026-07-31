@@ -105,14 +105,22 @@ class PlayingAudioWidget extends StatelessWidget {
     final meta = audioFile.meta;
 
     return [
-      SizedBox(
-        width: double.infinity,
-        height: 20,
-        child: Marquee(
-          text: meta.title ?? audioFile.name,
-          style: TextStyle(fontWeight: FontWeight.bold),
+      if (AudioStateController.instance.state.isPlaying)
+        SizedBox(
+          width: double.infinity,
+          height: 20,
+          child: Marquee(
+            text: meta.title ?? audioFile.name,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        )
+      else
+        Text(
+          meta.title ?? audioFile.name,
+          maxLines: 1,
+          overflow: .ellipsis,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
         ),
-      ),
       if (meta.artist != null) Text(meta.artist!, maxLines: 1),
 
       // song progress
