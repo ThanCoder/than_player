@@ -33,6 +33,10 @@ class AudioFile {
     return Utils.instance.getCachePath(cacheName);
   }
 
+  String get autoTitle {
+    return meta.title.isNotEmpty ? meta.title : name;
+  }
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,

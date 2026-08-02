@@ -4,15 +4,18 @@ sealed class VideoStateEvent {}
 
 class VideoStateAddEvent extends VideoStateEvent {
   final VideoFile file;
-  VideoStateAddEvent(this.file);
+  final String? eventKey;
+  VideoStateAddEvent(this.file, {this.eventKey});
 }
 
 class VideoStateRemoveEvent extends VideoStateEvent {
   final VideoFile file;
-  VideoStateRemoveEvent(this.file);
+  final String? eventKey;
+  VideoStateRemoveEvent(this.file, {this.eventKey});
 }
 
 class VideoStateRenameEvent extends VideoStateEvent {
   final VideoFile file;
-  VideoStateRenameEvent(this.file);
+  final String? eventKey;
+  VideoStateRenameEvent(this.file, {this.eventKey});
 }

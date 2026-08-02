@@ -25,8 +25,10 @@ class AudioStateController {
   ];
 
   late MyAudioHandler _audioHandler;
+  bool isInitialized = false;
 
   Future<void> init() async {
+    if (isInitialized) return;
     _audioHandler = await AudioService.init(
       builder: () => MyAudioHandler(),
       config: AudioServiceConfig(
@@ -35,6 +37,7 @@ class AudioStateController {
         androidNotificationIcon: 'mipmap/launcher_icon',
       ),
     );
+    isInitialized = true;
 
     _listenToAudioHandler();
   }
@@ -78,9 +81,13 @@ class AudioStateController {
   }
 
   Future<void> playTrack(AudioFile file) async {
+    var title = file.meta.title;
+    if (title.isEmpty) {
+      title = file.name;
+    }
     final item = MediaItem(
       id: file.id,
-      title: file.meta.title ?? file.name,
+      title: title,
       duration: file.meta.duration,
       artUri: Uri.file(file.cachCoverPath),
     );

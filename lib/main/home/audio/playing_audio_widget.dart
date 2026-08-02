@@ -103,25 +103,25 @@ class PlayingAudioWidget extends StatelessWidget {
 
   List<Widget> metaWidget(AudioFile audioFile, PlaybackEvent playbackEvent) {
     final meta = audioFile.meta;
-
+    final title = meta.title.isNotEmpty ? meta.title : audioFile.name;
     return [
       if (AudioStateController.instance.state.isPlaying)
         SizedBox(
           width: double.infinity,
           height: 20,
           child: Marquee(
-            text: meta.title ?? audioFile.name,
+            text: title,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
           ),
         )
       else
         Text(
-          meta.title ?? audioFile.name,
+          title,
           maxLines: 1,
           overflow: .ellipsis,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
         ),
-      if (meta.artist != null) Text(meta.artist!, maxLines: 1),
+      if (meta.artist.isNotEmpty) Text(meta.artist, maxLines: 1),
 
       // song progress
       songProgressWidget(playbackEvent),
@@ -158,12 +158,16 @@ class PlayingAudioWidget extends StatelessWidget {
         final event = snapshot.data;
         if (event != null && event.duration != null) {
           // print(event);
-          final dur = event.duration!.inMilliseconds;
-          final cur = event.updatePosition.inMilliseconds;
-          return LinearProgressIndicator(value: cur / dur);
+          try {
+            final dur = event.duration!.inMilliseconds;
+            final cur = event.updatePosition.inMilliseconds;
+            return LinearProgressIndicator(value: cur / dur);
+          } catch (e) {
+            return Text('progress error: $e');
+          }
         }
 
-        return SizedBox.fromSize();
+        return SizedBox.shrink();
       },
     );
   }

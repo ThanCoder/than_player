@@ -1,10 +1,14 @@
+import 'dart:io';
+
+import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
+import 'package:palette_generator_master/palette_generator_master.dart';
 import 'package:t_widgets/t_widgets.dart';
-import 'package:than_pkg/than_pkg.dart';
 import 'package:than_player/audio_bookmark/audio_bookmark_button.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
+import 'package:than_player/extensions/build_context_exts.dart';
 import 'package:than_player/main/home/audio/audio_seeker_widget.dart';
 
 class AudioContentPageOne extends StatefulWidget {
@@ -15,22 +19,6 @@ class AudioContentPageOne extends StatefulWidget {
 }
 
 class _AudioContentPageOneState extends State<AudioContentPageOne> {
-  @override
-  void initState() {
-    // if (Platform.isAndroid) {
-    //   ThanPkg.platform.toggleFullScreen(isFullScreen: true);
-    // }
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    // if (Platform.isAndroid) {
-    //   ThanPkg.platform.toggleFullScreen(isFullScreen: false);
-    // }
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -46,20 +34,41 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
         return Theme(
           data: ThemeData.dark(),
           child: Scaffold(
+            appBar: TPlatform.isDesktop ? AppBar() : null,
             body: Stack(
               children: [
                 Positioned.fill(child: coverWiget),
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: .8),
+                      color: context.brightness.isDark
+                          ? Colors.black.withValues(alpha: .4)
+                          : Colors.white.withValues(alpha: .4),
+
+                      gradient: LinearGradient(
+                        begin: .topCenter,
+                        end: .bottomCenter,
+                        colors: [
+                          const Color.fromARGB(255, 14, 66, 16),
+                          const Color.fromARGB(255, 41, 105, 158),
+                          const Color.fromARGB(255, 142, 28, 125),
+                          if (context.brightness.isDark)
+                            const Color.fromARGB(223, 39, 36, 36)
+                          else
+                            const Color.fromARGB(224, 212, 207, 207),
+                          if (context.brightness.isDark)
+                            const Color.fromARGB(177, 0, 0, 0)
+                          else
+                            Colors.transparent,
+                        ],
+                      ),
                     ),
                   ),
                 ),
 
                 // content
                 Positioned.fill(
-                  top: TPlatform.isDesktop ? 0 : 50,
+                  top: 0,
                   left: 0,
                   right: 0,
                   child: SafeArea(
@@ -71,17 +80,6 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
                     ),
                   ),
                 ),
-                // background colors
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: TPlatform.isDesktop
-                      ? AppBar(
-                          backgroundColor: Colors.black.withValues(alpha: .1),
-                        )
-                      : SizedBox.shrink(),
-                ),
                 // controls
                 Positioned(
                   left: 0,
@@ -89,11 +87,46 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
                   bottom: 0,
                   child: controlsWidget(state),
                 ),
+                // appbar background
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  height: 40,
+                  child: appbarBackgroundWidget,
+                ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget get appbarBackgroundWidget {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            if (context.brightness.isDark)
+              Colors.red
+            else
+              const Color.fromARGB(255, 212, 119, 113),
+            if (context.brightness.isDark)
+              Colors.blue
+            else
+              const Color.fromARGB(255, 96, 179, 195),
+            if (context.brightness.isDark)
+              Colors.blue
+            else
+              const Color.fromARGB(255, 237, 129, 233),
+            if (context.brightness.isDark)
+              Colors.green
+            else
+              const Color.fromARGB(255, 120, 194, 112),
+          ],
+        ),
+      ),
     );
   }
 
@@ -114,34 +147,21 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
   Widget contentWidget(AudioState state) {
     final currentAudioFile = AudioStateController.instance.currentAudioFile!;
 
-    return Padding(
+    return Container(
+      margin: EdgeInsets.only(top: 50),
       padding: const EdgeInsets.all(8.0),
       child: Column(
         spacing: 5,
         children: [
           Center(
-            child: Container(
-              width: 280, // Music App တွေရဲ့ Standard ပုံအရွယ်အစား
-              height: 280,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: coverWiget, // သင့်ရဲ့ ရုပ်ပုံ Widget
-              ),
+            child: CoverHeaderBox(
+              coverPath: currentAudioFile.cachCoverPath,
+              coverWiget: coverWiget,
             ),
           ),
 
           // သီချင်းခေါင်းစဉ်နှင့် အဆိုတော်အမည်
-          marqueeWidget(currentAudioFile.meta.title ?? currentAudioFile.name),
+          marqueeWidget(currentAudioFile.autoTitle),
           // const SizedBox(height: 8),
           // content scrollable
           scrollableContent(state),
@@ -155,22 +175,26 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
   Widget scrollableContent(AudioState state) {
     final currentAudioFile = AudioStateController.instance.currentAudioFile!;
     return SizedBox(
-      height: 50,
+      height: 100,
       child: SingleChildScrollView(
         child: Column(
           children: [
-            if (currentAudioFile.meta.artist != null)
+            if (currentAudioFile.meta.artist.isNotEmpty)
               Text(
-                currentAudioFile.meta.artist ?? 'Unknown Artist',
+                currentAudioFile.meta.artist.isNotEmpty
+                    ? currentAudioFile.meta.artist
+                    : 'Unknown Artist',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 16,
                 ),
                 textAlign: TextAlign.center,
               ),
-            if (currentAudioFile.meta.album != null)
+            if (currentAudioFile.meta.album.isNotEmpty)
               Text(
-                currentAudioFile.meta.album ?? 'Unknown Album',
+                currentAudioFile.meta.album.isNotEmpty
+                    ? currentAudioFile.meta.album
+                    : 'Unknown Album',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 16,
@@ -291,5 +315,63 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
         );
       },
     );
+  }
+}
+
+class CoverHeaderBox extends StatelessWidget {
+  final String coverPath;
+  final Widget coverWiget;
+  const CoverHeaderBox({
+    super.key,
+    required this.coverPath,
+    required this.coverWiget,
+  });
+
+  // late Future<PaletteGeneratorMaster> paletteFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: PaletteGeneratorMaster.fromImageProvider(
+        FileImage(File(coverPath)),
+      ),
+      builder: (context, snapshot) {
+        final generator = snapshot.data;
+
+        return Container(
+          width: 280, // Music App တွေရဲ့ Standard ပုံအရွယ်အစား
+          height: 280,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: boxShadow(generator),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: coverWiget, // သင့်ရဲ့ ရုပ်ပုံ Widget
+          ),
+        );
+      },
+    );
+  }
+
+  List<BoxShadow>? boxShadow(PaletteGeneratorMaster? generator) {
+    if (generator == null) return null;
+    final dominantColor = generator.dominantColor?.color ?? Colors.black;
+
+    // final vibrantColor = generator.vibrantColor?.color ?? dominantColor;
+    return [
+      BoxShadow(
+        color: dominantColor.withValues(alpha: 0.55),
+        blurRadius: 30,
+        spreadRadius: 3,
+      ),
+
+      // အောက်ဘက် shadow
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.4),
+        blurRadius: 20,
+        offset: const Offset(0, 10),
+      ),
+    ];
   }
 }

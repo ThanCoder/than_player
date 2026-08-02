@@ -18,38 +18,47 @@ class _AudioSeekerWidgetState extends State<AudioSeekerWidget> {
     return StreamBuilder(
       stream: AudioStateController.instance.playbackEventStream,
       builder: (context, snapshot) {
-        if (snapshot.data == null || snapshot.data!.duration == null) {
-          return SizedBox.shrink();
+        var dur = Duration.zero;
+        var cur = Duration.zero;
+        if (snapshot.data != null && snapshot.data!.duration != null) {
+          dur = snapshot.data!.duration!;
+          cur = snapshot.data!.updatePosition;
         }
-        final dur = snapshot.data!.duration!;
-        final cur = snapshot.data!.updatePosition;
-
         return Column(
           children: [
-            Slider.adaptive(
-              min: 0,
-              max: dur.inMilliseconds.toDouble(),
-              value: seekerRangeChanged
-                  ? seekerValue
-                  : cur.inMilliseconds.toDouble(),
-              onChangeStart: (value) {
-                setState(() {
-                  seekerRangeChanged = true;
-                });
-              },
-              onChanged: (value) {
-                setState(() {
-                  seekerValue = value;
-                });
-              },
-              onChangeEnd: (value) {
-                setState(() {
-                  seekerRangeChanged = false;
-                });
-                AudioStateController.instance.seek(
-                  Duration(milliseconds: seekerValue.toInt()),
-                );
-              },
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 4,
+                activeTrackColor: const Color.fromARGB(255, 244, 54, 98),
+                inactiveTrackColor: const Color.fromARGB(138, 153, 36, 27),
+                thumbShape: .noThumb,
+                // overlayColor: color.withValues(alpha: 0.15),
+              ),
+              child: Slider.adaptive(
+                min: 0,
+                max: dur.inMilliseconds.toDouble(),
+                value: seekerRangeChanged
+                    ? seekerValue
+                    : cur.inMilliseconds.toDouble(),
+                onChangeStart: (value) {
+                  setState(() {
+                    seekerRangeChanged = true;
+                  });
+                },
+                onChanged: (value) {
+                  setState(() {
+                    seekerValue = value;
+                  });
+                },
+                onChangeEnd: (value) {
+                  setState(() {
+                    seekerRangeChanged = false;
+                  });
+                  AudioStateController.instance.seek(
+                    Duration(milliseconds: seekerValue.toInt()),
+                  );
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),

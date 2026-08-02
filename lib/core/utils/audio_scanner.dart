@@ -15,14 +15,13 @@ class AudioScanner {
   Future<List<AudioFile>> scan() async {
     final roots = await PlatformUtils.getScanRootPath();
 
-    return await Isolate.run(() {
+    return await Isolate.run(() async {
       List<AudioFile> list = [];
 
       AudioFile? processEntry(FileSystemEntity entry, String name) {
         try {
           // 500 KB အောက် မထည့်ဘူး (1024 * 500)
           // if (entry.size < (1024 * 500)) return null;
-          
 
           final lower = name.toLowerCase();
 
@@ -68,7 +67,11 @@ class AudioScanner {
 
               if (entry is File) {
                 final audio = processEntry(entry, name);
-                if (audio != null) list.add(audio);
+
+                if (audio != null) {
+                  await audio.meta.getDurationInAndroid();
+                  list.add(audio);
+                }
               } else if (entry is Directory) {
                 // Directory ဖြစ်မှသာ Sub-directory စာရင်းထဲပေါင်းမည်
                 dirs.add(entry);

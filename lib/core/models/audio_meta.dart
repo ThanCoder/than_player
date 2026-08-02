@@ -13,48 +13,48 @@ class AudioMeta {
   final String path;
   AudioMeta(
     this.path, {
-    this.album,
-    this.artist,
-    this.bitrate,
-    this.bitrateMode,
-    this.comment,
-    this.coverMimeType,
-    this.duration,
-    this.format,
-    this.genre,
+    this.album = '',
+    this.artist = '',
+    this.bitrate = 0,
+    this.bitrateMode = '',
+    this.comment = '',
+    this.coverMimeType = '',
+    this.duration = .zero,
+    this.format = '',
+    this.genre = '',
     this.hasCover = false,
-    this.sampleRate,
-    this.title,
+    this.sampleRate = 0,
+    this.title = '',
   });
 
-  String? album;
-  String? title;
-  String? artist;
-  String? comment;
-  String? coverMimeType;
-  String? bitrateMode;
-  String? genre;
+  String album;
+  String title;
+  String artist;
+  String comment;
+  String coverMimeType;
+  String bitrateMode;
+  String genre;
   bool hasCover;
-  Duration? duration;
-  String? format;
-  int? bitrate;
-  int? sampleRate;
+  Duration duration;
+  String format;
+  int bitrate;
+  int sampleRate;
 
   Map<String, dynamic> toMap() {
     return {
       'path': path,
-      'album': album ?? '',
-      'title': title ?? '',
-      'artist': artist ?? '',
-      'comment': comment ?? '',
-      'coverMimeType': coverMimeType ?? '',
-      'genre': genre ?? '',
-      'bitrateMode': bitrateMode ?? 0,
+      'album': album,
+      'title': title,
+      'artist': artist,
+      'comment': comment,
+      'coverMimeType': coverMimeType,
+      'genre': genre,
+      'bitrateMode': bitrateMode,
       'hasCover': hasCover,
-      'duration': duration!.inMilliseconds,
-      'format': format ?? '',
-      'bitrate': bitrate ?? 0,
-      'sampleRate': sampleRate ?? 0,
+      'duration': duration.inMilliseconds,
+      'format': format,
+      'bitrate': bitrate,
+      'sampleRate': sampleRate,
     };
   }
 
@@ -76,9 +76,13 @@ class AudioMeta {
     );
   }
 
+  Future<void> getDurationInAndroid() async {
+    if (Platform.isAndroid) {}
+  }
+
   void openMeta() {
     final mm = lookupMimeType(path);
-    format = mm;
+    format = mm ?? '';
     final file = TagLibFile.open(path);
     if (file == null) {
       debugPrint('[Dev:AudioMeta:openMeta]: `TagLibFile.open` Error');
@@ -105,8 +109,11 @@ class AudioMeta {
     if (file.genre.isNotEmpty) {
       genre = file.genre;
     }
-    coverMimeType = file.coverMimeType;
+    coverMimeType = file.coverMimeType ?? '';
     hasCover = file.hasCover;
+    if (Platform.isLinux) {
+      duration = file.duration;
+    }
     if (Platform.isAndroid) {
       // https://pub.dev/packages/flutter_taglib
       //bugs ဖြစ်နေတာ
@@ -115,41 +122,27 @@ class AudioMeta {
       } else {
         duration = file.duration;
       }
-    } else {
-      duration = file.duration;
     }
-    // print('Dev: duration: ${duration!}');
-    // album = file.sampleRate;
     file.close();
   }
 
   String get formatDuration {
-    if (duration == null) return '00:00';
-    final mins = duration!.inMinutes;
-    final secs = duration!.inSeconds % 60;
+    final mins = duration.inMinutes;
+    final secs = duration.inSeconds % 60;
 
     return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
   String get formatLabel {
-    if (format != null) {
-      return path.extName.toUpperCase();
-    }
-    return 'Unknown';
+    return path.extName.toUpperCase();
   }
 
   String get bitrateLabel {
-    if (bitrate != null) {
-      return '$bitrate kb/s';
-    }
-    return '';
+    return '$bitrate kb/s';
   }
 
   String get sampleRateLabel {
-    if (sampleRate != null) {
-      return '${sampleRate! / 1000} kHz';
-    }
-    return '';
+    return '${sampleRate / 1000} kHz';
   }
 
   Future<Uint8List?> readImageAsync() async {

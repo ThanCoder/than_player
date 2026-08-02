@@ -58,15 +58,14 @@ class VideoStateController {
 
       // used cache
       if (usedCache) {
-        var list = <VideoFile>[];
-
-        VideoCacheListController.instance.setList(list);
+        var list = _state.list;
+        VideoCacheListController.instance.setList(_state.list);
         if (_state.list.isEmpty) {
           list = await _scanner.scan();
           VideoCacheListController.instance.addCacheList(list);
         }
         _state = _state.copyWith(isLoading: false, list: list);
-        sort();
+        sort(_state.list);
         _controller.add(_state);
         await scanAudioListFromBackgroundStorage();
       }
@@ -82,7 +81,7 @@ class VideoStateController {
           list: list,
           folderNames: folderNames,
         );
-        sort();
+        sort(_state.list);
         _controller.add(_state);
       }
     } catch (e) {
@@ -97,19 +96,27 @@ class VideoStateController {
     if (list.length != state.list.length) {
       _state = _state.copyWith(list: list);
       VideoCacheListController.instance.addCacheList(list);
-      sort();
+      sort(_state.list);
       _controller.add(_state);
     }
   }
 
+  void setListWithDirname(String dirname, List<VideoFile> files) {
+    //dirname တူတာ အကုန်ဖျက်
+    _state.list.removeWhere((e) => e.dirname == dirname);
+    _state.list.addAll(files);
+    sort(_state.list);
+    _controller.add(_state);
+  }
+
   //********************Sort******************** */
-  void sort() {
+  void sort(List<VideoFile> list) {
     if (_state.sortItem.id == SortItem.nameSortItem.id) {
-      _state.list.sortName(isA2Z: _state.sortItem.isTrue);
+      list.sortName(isA2Z: _state.sortItem.isTrue);
     } else if (_state.sortItem.id == SortItem.dateSortItem.id) {
-      _state.list.sortDate(isNewest: _state.sortItem.isTrue);
+      list.sortDate(isNewest: _state.sortItem.isTrue);
     } else if (_state.sortItem.id == SortItem.sizeSortItem.id) {
-      _state.list.sortSize(smToBig: _state.sortItem.isTrue);
+      list.sortSize(smToBig: _state.sortItem.isTrue);
     }
   }
 
@@ -119,21 +126,21 @@ class VideoStateController {
     CFBStore.getInstance.writeAll();
 
     _state = _state.copyWith(sortItem: item);
-    sort();
+    sort(_state.list);
     _controller.add(_state);
   }
 
   //********************Video File******************** */
   /// ### add -> State.
-  void addVideo(VideoFile newFile) {
-    _eventController.add(VideoStateAddEvent(newFile));
+  void addVideo(VideoFile newFile, {String? eventKey}) {
+    _eventController.add(VideoStateAddEvent(newFile, eventKey: eventKey));
     _state.list.add(newFile);
     _controller.add(_state);
   }
 
   /// ### rename -> State.
-  void renameVideoState(VideoFile newFile) {
-    _eventController.add(VideoStateRenameEvent(newFile));
+  void renameVideoState(VideoFile newFile, {String? eventKey}) {
+    _eventController.add(VideoStateRenameEvent(newFile, eventKey: eventKey));
     final index = state.list.indexWhere((e) => e.id == newFile.id);
     if (index == -1) return;
     _state.list[index] = newFile;
@@ -141,8 +148,8 @@ class VideoStateController {
   }
 
   /// ### remove -> State.
-  void removeVideoState(VideoFile file) {
-    _eventController.add(VideoStateRemoveEvent(file));
+  void removeVideoState(VideoFile file, {String? eventKey}) {
+    _eventController.add(VideoStateRemoveEvent(file, eventKey: eventKey));
     final index = state.list.indexWhere(
       (e) => e.id == file.id && e.name == file.name,
     );
@@ -183,7 +190,7 @@ class VideoStateController {
         updatedList[index] = updatedVideo;
 
         _state = _state.copyWith(list: updatedList);
-        sort(); // Sort ပြန်စီပေးရန် (လိုအပ်ပါက)
+        sort(_state.list); // Sort ပြန်စီပေးရန် (လိုအပ်ပါက)
         _controller.add(_state);
         _eventController.add(VideoStateRenameEvent(file));
       }

@@ -8,6 +8,9 @@ class VideoBookmarkViewButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (VideoBookmarkController.instance.list.isEmpty) {
+      return SizedBox.shrink();
+    }
     return SizedBox(
       width: 100,
       height: 50,

@@ -233,6 +233,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
               AudioSliverList(
                 list: state.list,
                 onClicked: (file) {
+                  // print(file.meta.title?.isEmpty);
                   AudioStateController.instance.setAudioList(state.list);
                   AudioStateController.instance.playTrack(file);
                 },

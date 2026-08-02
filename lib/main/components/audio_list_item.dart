@@ -107,13 +107,12 @@ class AudioListItem extends StatelessWidget {
         ),
         Row(
           children: [
-            if (meta.duration != null)
-              Text(meta.formatDuration, style: TextStyle(fontSize: 11)),
+            Text(meta.formatDuration, style: TextStyle(fontSize: 11)),
             AudioBookmarkButton(file: file, iconSize: 20),
-            if (meta.artist != null)
+            if (meta.artist.isNotEmpty)
               Expanded(
                 child: Text(
-                  ' - ${meta.artist!}',
+                  ' - ${meta.artist}',
                   maxLines: 1,
                   style: TextStyle(fontSize: 11),
                 ),
@@ -121,7 +120,7 @@ class AudioListItem extends StatelessWidget {
           ],
         ),
         // audio info
-        if (meta.bitrate != null && meta.sampleRate != null)
+        if (meta.bitrate != 0 && meta.sampleRate != 0)
           Text(
             '${meta.formatLabel} * ${meta.bitrateLabel} * ${meta.sampleRateLabel}',
             style: TextStyle(fontSize: 11),

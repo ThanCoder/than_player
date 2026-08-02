@@ -13,14 +13,14 @@ import 'package:than_player/video_config/video_config_services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Utils.instance.init();
 
   await TWidgets.instance.init(
     defaultImageAssetsPath: 'assets/images/logos/logo.png',
   );
-
-  JustAudioMediaKit.ensureInitialized(linux: true, android: true);
+  if (!AudioStateController.instance.isInitialized) {
+    JustAudioMediaKit.ensureInitialized(linux: true, android: true);
+  }
   await AudioStateController.instance.init();
 
   await CFBStore.getInstance.open(

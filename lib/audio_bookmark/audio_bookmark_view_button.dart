@@ -8,6 +8,9 @@ class AudioBookmarkViewButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AudioBookmarkController.instance.list.isEmpty) {
+      return SizedBox.shrink();
+    }
     return SizedBox(
       width: 100,
       height: 50,
@@ -25,11 +28,11 @@ class AudioBookmarkViewButton extends StatelessWidget {
             child: InkWell(
               mouseCursor: SystemMouseCursors.click,
               borderRadius: BorderRadius.circular(5),
-              splashColor: Colors.teal.withValues(alpha: 
-                0.2,
+              splashColor: Colors.teal.withValues(
+                alpha: 0.2,
               ), // Click လုပ်ချိန် ထွက်လာမယ့် Ripple အရောင်
-              highlightColor: Colors.teal.withValues(alpha: 
-                0.1,
+              highlightColor: Colors.teal.withValues(
+                alpha: 0.1,
               ), // ဖိထားချိန် Background ပြောင်းသွားမယ့် အရောင်
               onTap: () {
                 context.push(builder: (mainContext) => AudioBookmarkViewPage());
