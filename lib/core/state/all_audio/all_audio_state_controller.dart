@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/all_audio/all_audio_state.dart';
 import 'package:than_player/core/utils/audio_scanner.dart';
-import 'package:than_player/main/home/audio/audio_cache_list_controller.dart';
+import 'package:than_player/core/state/all_audio/audio_cache_list_controller.dart';
 import 'package:than_player/partials/sort_provider.dart';
 
 class AllAudioStateController {
@@ -24,7 +24,7 @@ class AllAudioStateController {
     SortItem.sizeSortItem,
   ];
   final _scanner = AudioScanner();
-  Future<void> scanAudioListFromStorageAndCache() async {
+  Future<void> scanAudioListFromStorageAndCache({bool usedCache = true}) async {
     try {
       SortItem sortItem = sortList[1];
       final recentSortId = CFBStore.getInstance.getInt(
@@ -43,17 +43,27 @@ class AllAudioStateController {
       _state = _state.copyWith(isLoading: true, list: [], sortItem: sortItem);
       _controller.add(_state);
 
-      var list = <AudioFile>[];
-      AudioCacheListController.instance.setList(list);
-      if (list.isEmpty) {
-        list = await _scanner.scan();
-        AudioCacheListController.instance.addCacheList(list);
+      if (usedCache) {
+        var list = <AudioFile>[];
+        AudioCacheListController.instance.setList(list);
+        if (list.isEmpty) {
+          list = await _scanner.scan();
+          AudioCacheListController.instance.addCacheList(list);
+        }
+        _state = _state.copyWith(isLoading: false, list: list);
+        sort();
+        _controller.add(_state);
+        await scanAudioListFromBackgroundStorage();
       }
-
-      _state = _state.copyWith(isLoading: false, list: list);
-      sort();
-      _controller.add(_state);
-      await scanAudioListFromBackgroundStorage();
+      // not cache
+      else {
+        _state = _state.copyWith(isLoading: true, list: [], sortItem: sortItem);
+        final list = await _scanner.scan();
+        AudioCacheListController.instance.addCacheList(list);
+        _state = _state.copyWith(isLoading: false, list: list);
+        sort();
+        _controller.add(_state);
+      }
     } catch (e) {
       _state = _state.copyWith(error: e.toString(), isLoading: false);
       _controller.add(_state);
@@ -65,6 +75,7 @@ class AllAudioStateController {
     debugPrint('[background fetched]: len ${list.length}');
     if (list.length != state.list.length) {
       _state = _state.copyWith(isLoading: false, list: list);
+      AudioCacheListController.instance.addCacheList(list);
       sort();
       _controller.add(_state);
     }

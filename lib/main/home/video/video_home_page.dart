@@ -47,13 +47,13 @@ class _VideoHomePageState extends State<VideoHomePage> {
   bool isCalled = false;
   bool canVideoDrop = true;
 
-  Future<void> init() async {
+  Future<void> init({bool usedCache = true}) async {
     try {
       if (!await ThanPkg.platform.isStoragePermissionGranted()) {
         await ThanPkg.platform.requestStoragePermission();
         return;
       }
-      await VideoStateController.instance.scanList();
+      await VideoStateController.instance.scanList(usedCache: usedCache);
       isCalled = true;
       setState(() {});
     } catch (e) {
@@ -84,11 +84,14 @@ class _VideoHomePageState extends State<VideoHomePage> {
         }
         if (state.list.isEmpty) {
           return Center(
-            child: RefreshButton(text: Text('Refersh'), onClicked: init),
+            child: RefreshButton(
+              text: Text('Refersh'),
+              onClicked: () => init(usedCache: false),
+            ),
           );
         }
         return RefreshIndicator.adaptive(
-          onRefresh: init,
+          onRefresh: () => init(usedCache: false),
           child: SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -110,7 +113,10 @@ class _VideoHomePageState extends State<VideoHomePage> {
 
         Spacer(),
         if (TPlatform.isDesktop)
-          IconButton(onPressed: init, icon: Icon(Icons.refresh)),
+          IconButton(
+            onPressed: () => init(usedCache: false),
+            icon: Icon(Icons.refresh),
+          ),
         StreamBuilder(
           stream: VideoStateController().stateStream,
           builder: (context, asyncSnapshot) {

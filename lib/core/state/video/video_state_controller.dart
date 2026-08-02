@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:cfb_store/cfb_store.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:than_player/core/models/video_file.dart';
 import 'package:than_player/core/services/video_file_services.dart';
+import 'package:than_player/core/state/video/video_cache_list_controller.dart';
 import 'package:than_player/core/state/video/video_state.dart';
 import 'package:than_player/core/state/video/video_state_events.dart';
 import 'package:than_player/core/utils/video_scanner.dart';
@@ -28,7 +30,7 @@ class VideoStateController {
 
   //********************Scan Video Files******************** */
   final _scanner = VideoScanner();
-  Future<void> scanList() async {
+  Future<void> scanList({bool usedCache = true}) async {
     try {
       //**************Sort****************** */
       SortItem sortItem = sortList[1];
@@ -54,20 +56,48 @@ class VideoStateController {
       _controller.add(_state);
       //**************Sort End****************** */
 
-      final list = await _scanner.scan();
-      final folderNames = <String>{};
-      for (var file in list) {
-        folderNames.add(file.dirname);
+      // used cache
+      if (usedCache) {
+        var list = <VideoFile>[];
+
+        VideoCacheListController.instance.setList(list);
+        if (_state.list.isEmpty) {
+          list = await _scanner.scan();
+          VideoCacheListController.instance.addCacheList(list);
+        }
+        _state = _state.copyWith(isLoading: false, list: list);
+        sort();
+        _controller.add(_state);
+        await scanAudioListFromBackgroundStorage();
       }
-      _state = _state.copyWith(
-        isLoading: false,
-        list: list,
-        folderNames: folderNames,
-      );
-      sort();
-      _controller.add(_state);
+      // no cache
+      else {
+        final list = await _scanner.scan();
+        final folderNames = <String>{};
+        for (var file in list) {
+          folderNames.add(file.dirname);
+        }
+        _state = _state.copyWith(
+          isLoading: false,
+          list: list,
+          folderNames: folderNames,
+        );
+        sort();
+        _controller.add(_state);
+      }
     } catch (e) {
       _state = _state.copyWith(error: e.toString(), isLoading: false);
+      _controller.add(_state);
+    }
+  }
+
+  Future<void> scanAudioListFromBackgroundStorage() async {
+    final list = await _scanner.scan();
+    debugPrint('[background fetched]: len ${list.length}');
+    if (list.length != state.list.length) {
+      _state = _state.copyWith(list: list);
+      VideoCacheListController.instance.addCacheList(list);
+      sort();
       _controller.add(_state);
     }
   }

@@ -62,13 +62,15 @@ class _AudioHomePageState extends State<AudioHomePage> {
   }
 
   bool isCalled = false;
-  Future<void> init() async {
+  Future<void> init({bool usedCache = true}) async {
     try {
       if (!await ThanPkg.platform.isStoragePermissionGranted()) {
         await ThanPkg.platform.requestStoragePermission();
         return;
       }
-      await AllAudioStateController.instance.scanAudioListFromStorageAndCache();
+      await AllAudioStateController.instance.scanAudioListFromStorageAndCache(
+        usedCache: usedCache,
+      );
       isCalled = true;
       setState(() {});
     } catch (e) {
@@ -139,9 +141,7 @@ class _AudioHomePageState extends State<AudioHomePage> {
                       actions: [
                         if (TPlatform.isDesktop)
                           IconButton(
-                            onPressed: AllAudioStateController
-                                .instance
-                                .scanAudioListFromStorageAndCache,
+                            onPressed: () => init(usedCache: false),
                             icon: Icon(Icons.refresh),
                           ),
                       ],
@@ -217,11 +217,14 @@ class _AudioHomePageState extends State<AudioHomePage> {
         }
         if (state.list.isEmpty) {
           return Center(
-            child: RefreshButton(text: Text('Refersh'), onClicked: init),
+            child: RefreshButton(
+              text: Text('Refersh'),
+              onClicked: () => init(usedCache: false),
+            ),
           );
         }
         return RefreshIndicator.adaptive(
-          onRefresh: init,
+          onRefresh: () => init(usedCache: false),
           child: CustomScrollView(
             controller: songListController,
             slivers: [

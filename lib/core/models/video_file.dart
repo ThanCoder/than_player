@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:than_player/core/utils/utils.dart';
 
 class VideoFile {
@@ -28,6 +27,28 @@ class VideoFile {
   @override
   String toString() {
     return 'VideoFile(id: $id, name: $name, path: $path, dirname: $dirname, date: $date, size: $size)';
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'path': path,
+      'dirname': dirname,
+      'date': date.millisecondsSinceEpoch,
+      'size': size,
+    };
+  }
+
+  factory VideoFile.fromMap(Map<String, dynamic> map) {
+    return VideoFile(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      path: map['path'] as String,
+      dirname: map['dirname'] as String,
+      date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
+      size: map['size'] as int,
+    );
   }
 }
 
