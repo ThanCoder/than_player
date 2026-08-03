@@ -13,7 +13,7 @@ class Utils {
   Utils._();
   factory Utils() => instance;
 
-  late String cachePath;
+  late Directory cacheDir;
   late String configPath;
   late PackageInfo packageInfo;
   late String androidRootDirPath;
@@ -23,7 +23,7 @@ class Utils {
       final cacheDir = await getApplicationCacheDirectory();
       final configDir = await getApplicationSupportDirectory();
 
-      cachePath = cacheDir.path;
+      this.cacheDir = cacheDir;
       final cfDir = Directory(configDir.path.join('config'));
       if (!cfDir.existsSync()) {
         cfDir.createSync();
@@ -44,8 +44,11 @@ class Utils {
   }
 
   String getCachePath([String? name]) {
-    if (name == null) return cachePath;
-    return cachePath.join(name);
+    if (!cacheDir.existsSync()) {
+      cacheDir.createSync();
+    }
+    if (name == null) return cacheDir.path;
+    return cacheDir.path.join(name);
   }
 
   String getConfigPath([String? name]) {
@@ -97,6 +100,7 @@ class Utils {
     return await Isolate.run(() {
       try {
         dir.deleteSync(recursive: true);
+        dir.createSync();
         return true;
       } catch (e) {
         debugPrint('[Utils:deleteDir]: $e');

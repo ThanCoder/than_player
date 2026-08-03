@@ -6,7 +6,8 @@ import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/all_audio/all_audio_state.dart';
 import 'package:than_player/core/utils/audio_scanner.dart';
 import 'package:than_player/core/state/all_audio/audio_cache_list_controller.dart';
-import 'package:than_player/partials/sort_provider.dart';
+import 'package:than_player/ui/audio/audio_blocklist/audio_blocklist_controller.dart';
+import 'package:than_player/ui/partials/sort_provider.dart';
 
 class AllAudioStateController {
   static AllAudioStateController instance = AllAudioStateController._();
@@ -52,6 +53,8 @@ class AllAudioStateController {
         }
         _state = _state.copyWith(isLoading: false, list: list);
         sort();
+        // filter blocklist
+        filterBlockList(_state.list);
         _controller.add(_state);
         await scanAudioListFromBackgroundStorage();
       }
@@ -62,6 +65,8 @@ class AllAudioStateController {
         AudioCacheListController.instance.addCacheList(list);
         _state = _state.copyWith(isLoading: false, list: list);
         sort();
+        // filter blocklist
+        filterBlockList(_state.list);
         _controller.add(_state);
       }
     } catch (e) {
@@ -77,8 +82,34 @@ class AllAudioStateController {
       _state = _state.copyWith(isLoading: false, list: list);
       AudioCacheListController.instance.addCacheList(list);
       sort();
+      // filter blocklist
+      filterBlockList(_state.list);
       _controller.add(_state);
     }
+  }
+
+  //**************block list****************** */
+  void addBlockList(AudioFile file) {
+    AudioBlocklistController.instance.add(file);
+    filterBlockList(_state.list);
+
+    _controller.add(_state);
+  }
+
+  void removeBlockList(AudioFile file) {
+    AudioBlocklistController.instance.remove(file);
+
+    _state.list.add(file);
+    sort();
+    _controller.add(_state);
+  }
+
+  void filterBlockList(List<AudioFile> files) {
+    final blockedIds = AudioBlocklistController.instance.list
+        .map((e) => e.id)
+        .toSet();
+    if (blockedIds.isEmpty) return;
+    files.removeWhere((e) => blockedIds.contains(e.id));
   }
 
   //**************Sort****************** */

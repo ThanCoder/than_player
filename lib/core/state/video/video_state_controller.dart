@@ -8,7 +8,7 @@ import 'package:than_player/core/state/video/video_cache_list_controller.dart';
 import 'package:than_player/core/state/video/video_state.dart';
 import 'package:than_player/core/state/video/video_state_events.dart';
 import 'package:than_player/core/utils/video_scanner.dart';
-import 'package:than_player/partials/sort_provider.dart';
+import 'package:than_player/ui/partials/sort_provider.dart';
 
 class VideoStateController {
   static VideoStateController instance = VideoStateController._();

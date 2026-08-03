@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:than_player/audio_bookmark/audio_bookmark_controller.dart';
+import 'package:than_player/ui/audio/audio_bookmark/audio_bookmark_controller.dart';
 import 'package:than_player/core/state/audio/audio_state_controller.dart';
 
 class MyAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {

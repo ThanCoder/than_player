@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:than_player/audio_bookmark/audio_bookmark_controller.dart';
+import 'package:than_player/ui/audio/audio_bookmark/audio_bookmark_controller.dart';
 import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/state/audio/audio_state.dart';
 import 'package:than_player/core/state/audio/my_audio_handler.dart';
 import 'package:than_player/core/utils/utils.dart';
-import 'package:than_player/partials/sort_provider.dart';
+import 'package:than_player/ui/partials/sort_provider.dart';
 
 class AudioStateController {
   static AudioStateController instance = AudioStateController._();

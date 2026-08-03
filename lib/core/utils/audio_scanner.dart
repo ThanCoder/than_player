@@ -16,6 +16,7 @@ class AudioScanner {
   Future<List<AudioFile>> scan() async {
     final roots = await PlatformUtils.getScanRootPath();
     final cachePath = Utils.instance.getCachePath();
+    final minAudioFileSize = 1024 * 20;
     return await Isolate.run(() async {
       List<AudioFile> list = [];
 
@@ -23,6 +24,7 @@ class AudioScanner {
         try {
           // 500 KB အောက် မထည့်ဘူး (1024 * 500)
           // if (entry.size < (1024 * 500)) return null;
+          if (entry.size < minAudioFileSize) return null;
 
           final lower = name.toLowerCase();
 

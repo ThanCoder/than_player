@@ -25,16 +25,14 @@ dependencies:
   package_info_plus: ^10.2.0
   marquee: ^2.3.0
   crypto: ^3.0.7
-  cfb_store:
-    path: /home/thancoder/projects/dart_plugins/cfb_store_dart
+  cfb_store: ^0.5.0
   screen_brightness: ^2.1.11
   than_pkg_linux: ^0.0.1
   than_pkg_android: ^0.2.1
   desktop_drop: ^0.7.1
   lottie: ^3.5.1
   palette_generator_master: ^1.1.0
-  than_audiotag:
-    path: /home/thancoder/projects/dart_plugins/than_audiotag
+  than_audiotag: ^0.0.1
   android_libcpp_shared: ^0.2.0
 
 dev_dependencies:
