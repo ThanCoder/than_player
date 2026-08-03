@@ -156,15 +156,6 @@ class AudioListItem extends StatelessWidget {
   }
 
   Widget get coverWidget {
-    return FutureBuilder(
-      future: file.meta.readImageCache(file.cacheName),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Center(child: TLoader());
-        }
-        final cachePath = snapshot.data!;
-        return TImageFile(path: cachePath, fit: .cover);
-      },
-    );
+    return TImageFile(path: file.cacheCoverPath, fit: .cover);
   }
 }

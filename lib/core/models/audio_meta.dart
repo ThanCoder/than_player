@@ -1,11 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dart_core_extensions/dart_core_extensions.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_taglib/flutter_taglib.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mime/mime.dart';
+import 'package:than_audiotag/than_audiotag.dart';
 
 import 'package:than_player/core/utils/utils.dart';
 
@@ -80,50 +79,36 @@ class AudioMeta {
     if (Platform.isAndroid) {}
   }
 
-  void openMeta() {
+  void openMeta(String cachePath) {
     final mm = lookupMimeType(path);
     format = mm ?? '';
-    final file = TagLibFile.open(path);
-    if (file == null) {
-      debugPrint('[Dev:AudioMeta:openMeta]: `TagLibFile.open` Error');
-      return;
-    }
-    if (file.title.isNotEmpty) {
-      title = file.title;
-    }
-    bitrate = file.audioInfo.bitrate;
-    sampleRate = file.audioInfo.sampleRate;
-
-    if (file.album.isNotEmpty) {
-      album = file.album;
-    }
-    if (file.artist.isNotEmpty) {
-      artist = file.artist;
-    }
-    if (file.bitrateMode.isNotEmpty) {
-      bitrateMode = file.bitrateMode;
-    }
-    if (file.comment.isNotEmpty) {
-      comment = file.comment;
-    }
-    if (file.genre.isNotEmpty) {
-      genre = file.genre;
-    }
-    coverMimeType = file.coverMimeType ?? '';
-    hasCover = file.hasCover;
-    if (Platform.isLinux) {
-      duration = file.duration;
-    }
-    if (Platform.isAndroid) {
-      // https://pub.dev/packages/flutter_taglib
-      //bugs ဖြစ်နေတာ
-      if (file.duration.inSeconds == 0 && file.duration.inMilliseconds > 0) {
-        duration = Duration(seconds: file.duration.inMilliseconds);
-      } else {
-        duration = file.duration;
+    try {
+      final file = ThanAudioTag.open(path);
+      title = file.tag.title;
+      album = file.tag.album;
+      artist = file.tag.artist;
+      comment = file.tag.comment;
+      genre = file.tag.genre;
+      // track = file.tag.track;
+      // year = file.tag.year;
+      duration = file.properties.durationAsDuration;
+      bitrate = file.properties.bitrate;
+      // channels = file.properties.channels;
+      sampleRate = file.properties.sampleRate;
+      if (file.cover != null) {
+        coverMimeType = file.cover!.mimeType;
+        // description = file.cover!.description;
+        // pictureType = file.cover!.pictureType;
+        final cacheFile = File(cachePath);
+        if (!cacheFile.existsSync()) {
+          cacheFile.writeAsBytesSync(file.cover!.data);
+        }
       }
+
+      file.close();
+    } catch (e) {
+      debugPrint('[Dev: AudioMeta:openMeta]: $e');
     }
-    file.close();
   }
 
   String get formatDuration {
@@ -145,23 +130,13 @@ class AudioMeta {
     return '${sampleRate / 1000} kHz';
   }
 
-  Future<Uint8List?> readImageAsync() async {
-    final file = await TagLibFile.openAsync(path);
-    Uint8List? coverData;
-    if (file != null) {
-      coverData = file.coverData;
-      file.close();
-    }
-    return coverData;
-  }
-
   Future<String> readImageCache(String cacheName) async {
     final cacheFile = File(Utils.instance.getCachePath(cacheName));
-    if (!cacheFile.existsSync()) {
-      final bytes = await readImageAsync();
-      if (bytes == null) return cacheFile.path;
-      await cacheFile.writeAsBytes(bytes);
-    }
+    // if (!cacheFile.existsSync()) {
+    //   final bytes = await readImageAsync();
+    //   if (bytes == null) return cacheFile.path;
+    //   await cacheFile.writeAsBytes(bytes);
+    // }
     return cacheFile.path;
   }
 

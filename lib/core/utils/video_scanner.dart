@@ -57,6 +57,15 @@ class VideoScanner {
       if (!videoSupportedExtensions.any(lower.endsWith)) {
         return null;
       }
+      // Duration? duration;
+      // try {
+      //   final tag = ThanAudioTag.open(entry.path);
+      //   duration = tag.properties.durationAsDuration;
+      //   tag.close();
+      // } catch (e) {
+      //   debugPrint('[VideoScanner:processEntry->ThanAudioTag]: $e');
+      // }
+
       return VideoFile(
         id: FileUtils.getFileIdSync(entry.path),
         name: name,
@@ -64,6 +73,7 @@ class VideoScanner {
         dirname: entry.parent.onlyName,
         date: entry.modifiedDate,
         size: entry.size,
+        // duration: duration,
       );
     } catch (e) {
       debugPrint('Dev: [VideoScanner:processEntry]: $e');

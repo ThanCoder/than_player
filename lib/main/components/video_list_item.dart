@@ -93,9 +93,11 @@ class VideoListItem extends StatelessWidget {
   }
 
   Widget get durationWidget {
-    if (config == null || config!.duration == .zero) {
+    if ((config == null || config!.duration == .zero)) {
       return SizedBox.shrink();
     }
+    var duration = config!.duration;
+
     return Container(
       padding: EdgeInsets.all(1),
       decoration: BoxDecoration(
@@ -103,7 +105,7 @@ class VideoListItem extends StatelessWidget {
         borderRadius: .circular(2),
       ),
       child: Text(
-        config!.duration.toRemainingLabel(),
+        duration.toRemainingLabel(),
         style: TextStyle(color: Colors.white, fontSize: 10),
       ),
     );

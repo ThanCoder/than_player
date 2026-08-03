@@ -10,11 +10,12 @@ import 'package:than_player/core/models/audio_file.dart';
 import 'package:than_player/core/models/audio_meta.dart';
 import 'package:than_player/core/utils/file_utils.dart';
 import 'package:than_player/core/utils/platform_utils.dart';
+import 'package:than_player/core/utils/utils.dart';
 
 class AudioScanner {
   Future<List<AudioFile>> scan() async {
     final roots = await PlatformUtils.getScanRootPath();
-
+    final cachePath = Utils.instance.getCachePath();
     return await Isolate.run(() async {
       List<AudioFile> list = [];
 
@@ -28,18 +29,21 @@ class AudioScanner {
           if (!audioSupportedExtensions.any(lower.endsWith)) {
             return null;
           }
+          final id = FileUtils.getFileIdSync(entry.path);
 
           final meta = AudioMeta(entry.path);
-          meta.openMeta();
+          final cacheCoverPath = PathBuf(cachePath).join('$id.png').path;
+          meta.openMeta(cacheCoverPath);
 
           return AudioFile(
-            id: FileUtils.getFileIdSync(entry.path),
+            id: id,
             name: name,
             path: entry.path,
             dirname: entry.parent.onlyName,
             date: entry.modifiedDate,
             meta: meta,
             size: entry.size,
+            cacheCoverPath: cacheCoverPath,
           );
         } catch (e) {
           debugPrint('[AudioScanner:processEntry]: $e');

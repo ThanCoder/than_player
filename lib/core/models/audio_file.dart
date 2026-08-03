@@ -1,11 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
-import 'package:dart_core_extensions/dart_core_extensions.dart';
-
 import 'package:than_player/core/models/audio_meta.dart';
-import 'package:than_player/core/utils/utils.dart';
 
 class AudioFile {
   final String name;
@@ -15,6 +8,7 @@ class AudioFile {
   final DateTime date;
   final AudioMeta meta;
   final int size;
+  final String cacheCoverPath;
   const AudioFile({
     required this.id,
     required this.name,
@@ -23,15 +17,8 @@ class AudioFile {
     required this.date,
     required this.meta,
     required this.size,
+    required this.cacheCoverPath,
   });
-  String get cacheName {
-    final digest = md5.convert(utf8.encode(name.onlyName));
-    return '${digest.toString()}.png';
-  }
-
-  String get cachCoverPath {
-    return Utils.instance.getCachePath(cacheName);
-  }
 
   String get autoTitle {
     return meta.title.isNotEmpty ? meta.title : name;
@@ -46,6 +33,7 @@ class AudioFile {
       'date': date.millisecondsSinceEpoch,
       'meta': meta.toMap(),
       'size': size,
+      'cacheCoverPath': cacheCoverPath,
     };
   }
 
@@ -58,6 +46,7 @@ class AudioFile {
       date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
       meta: AudioMeta.fromMap(map['meta'] as Map<String, dynamic>),
       size: map['size'] as int,
+      cacheCoverPath: map['cacheCoverPath'] ?? '',
     );
   }
 }

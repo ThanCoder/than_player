@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_taglib/flutter_taglib.dart';
 import 'package:t_widgets/t_widgets.dart';
+import 'package:than_audiotag/than_audiotag.dart';
 import 'package:than_player/core/models/audio_file.dart';
 
 class AudioEditCoverPage extends StatefulWidget {
@@ -25,10 +25,10 @@ class _AudioEditCoverPageState extends State<AudioEditCoverPage> {
           children: [
             Text('Choosr Cover Image'),
             TCoverChooser(
-              coverPath: widget.file.cachCoverPath,
+              coverPath: widget.file.cacheCoverPath,
               onChanged: setCover,
             ),
-            if (File(widget.file.cachCoverPath).existsSync())
+            if (File(widget.file.cacheCoverPath).existsSync())
               TextButton(
                 onPressed: () {
                   showTConfirmDialog(
@@ -50,21 +50,30 @@ class _AudioEditCoverPageState extends State<AudioEditCoverPage> {
 
   void deleteCover() async {
     try {
-      final imageFile = File(widget.file.cachCoverPath);
-      final tagFile = await TagLibFile.openAsync(
-        widget.file.path,
-        writeAccess: true,
-      );
-      if (!imageFile.existsSync() || tagFile == null) return;
-
-      tagFile.setCover(data: null);
-
-      if (tagFile.save()) {
+      final imageFile = File(widget.file.cacheCoverPath);
+      final f = ThanAudioTag.open(widget.file.path);
+      if (f.cover != null) {
+        f.removeCover();
         await imageFile.delete();
         if (!mounted) return;
         showTSnackBar(context, 'Cover Deleted');
       }
-      tagFile.close();
+      f.close();
+
+      // final tagFile = await TagLibFile.openAsync(
+      //   widget.file.path,
+      //   writeAccess: true,
+      // );
+      // if (!imageFile.existsSync() || tagFile == null) return;
+
+      // tagFile.setCover(data: null);
+
+      // if (tagFile.save()) {
+      //   await imageFile.delete();
+      //   if (!mounted) return;
+      //   showTSnackBar(context, 'Cover Deleted');
+      // }
+      // tagFile.close();
       setState(() {});
     } catch (e) {
       if (!mounted) return;
@@ -74,21 +83,28 @@ class _AudioEditCoverPageState extends State<AudioEditCoverPage> {
 
   void setCover() async {
     try {
-      final imageFile = File(widget.file.cachCoverPath);
-      final tagFile = await TagLibFile.openAsync(
-        widget.file.path,
-        writeAccess: true,
-      );
-      if (!imageFile.existsSync() || tagFile == null) return;
-
-      tagFile.setCover(data: await imageFile.readAsBytes());
-
-      if (tagFile.save()) {
-        if (!mounted) return;
-        showTSnackBar(context, 'Cover Updated');
-      }
-      tagFile.close();
+      final imageFile = File(widget.file.cacheCoverPath);
+      final f = ThanAudioTag.open(widget.file.path);
+      f.writeCover(await imageFile.readAsBytes());
+      if (!mounted) return;
+      showTSnackBar(context, 'Cover Updated');
+      f.close();
       setState(() {});
+
+      // final tagFile = await TagLibFile.openAsync(
+      //   widget.file.path,
+      //   writeAccess: true,
+      // );
+      // if (!imageFile.existsSync() || tagFile == null) return;
+
+      // tagFile.setCover(data: await imageFile.readAsBytes());
+
+      // if (tagFile.save()) {
+      //   if (!mounted) return;
+      //   showTSnackBar(context, 'Cover Updated');
+      // }
+      // tagFile.close();
+      // setState(() {});
     } catch (e) {
       if (!mounted) return;
       showTMessageDialogError(context, e.toString());

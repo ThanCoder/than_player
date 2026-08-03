@@ -21,7 +21,6 @@ dependencies:
   t_widgets: ^2.6.1
   mime: ^2.0.0
   than_pkg: ^5.1.0
-  flutter_taglib: ^1.4.1
   just_audio: ^0.10.5
   package_info_plus: ^10.2.0
   marquee: ^2.3.0
@@ -34,6 +33,9 @@ dependencies:
   desktop_drop: ^0.7.1
   lottie: ^3.5.1
   palette_generator_master: ^1.1.0
+  than_audiotag:
+    path: /home/thancoder/projects/dart_plugins/than_audiotag
+  android_libcpp_shared: ^0.2.0
 
 dev_dependencies:
   flutter_test:

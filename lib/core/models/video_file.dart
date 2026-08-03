@@ -7,6 +7,7 @@ class VideoFile {
   final String dirname;
   final DateTime date;
   final int size;
+  final Duration? duration;
   const VideoFile({
     required this.id,
     required this.name,
@@ -14,6 +15,7 @@ class VideoFile {
     required this.dirname,
     required this.date,
     required this.size,
+    this.duration,
   });
 
   String get cacheName {

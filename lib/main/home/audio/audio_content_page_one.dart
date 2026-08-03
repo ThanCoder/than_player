@@ -131,16 +131,9 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
   }
 
   Widget get coverWiget {
-    return FutureBuilder(
-      future: AudioStateController.instance.currentCoverPath,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Center(child: TLoaderRandom());
-        }
-        final cachePath = snapshot.data!;
-        // print(cachePath);
-        return TImageFile(path: cachePath, fit: .fitHeight);
-      },
+    return TImageFile(
+      path: AudioStateController.instance.currentCoverPath,
+      fit: .fitHeight,
     );
   }
 
@@ -155,7 +148,7 @@ class _AudioContentPageOneState extends State<AudioContentPageOne> {
         children: [
           Center(
             child: CoverHeaderBox(
-              coverPath: currentAudioFile.cachCoverPath,
+              coverPath: currentAudioFile.cacheCoverPath,
               coverWiget: coverWiget,
             ),
           ),

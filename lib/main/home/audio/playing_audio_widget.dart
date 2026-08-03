@@ -1,5 +1,4 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:dart_core_extensions/dart_core_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:marquee/marquee.dart';
@@ -86,19 +85,7 @@ class PlayingAudioWidget extends StatelessWidget {
   }
 
   Widget coverWidget(AudioFile audioFile) {
-    return FutureBuilder(
-      future: audioFile.meta.readImageCache('${audioFile.name.onlyName}.png'),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Center(
-            child: SizedBox(width: 50, height: 50, child: TLoaderRandom()),
-          );
-        }
-        final cachePath = snapshot.data!;
-        // print(cachePath);
-        return TImageFile(path: cachePath);
-      },
-    );
+    return TImageFile(path: audioFile.cacheCoverPath);
   }
 
   List<Widget> metaWidget(AudioFile audioFile, PlaybackEvent playbackEvent) {

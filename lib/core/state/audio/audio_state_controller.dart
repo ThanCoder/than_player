@@ -89,7 +89,7 @@ class AudioStateController {
       id: file.id,
       title: title,
       duration: file.meta.duration,
-      artUri: Uri.file(file.cachCoverPath),
+      artUri: Uri.file(file.cacheCoverPath),
     );
     _state = _state.copyWith(showFloatingAudioWidget: true);
     await _audioHandler.playAudioFile(file.path, item);
@@ -189,13 +189,13 @@ class AudioStateController {
     if (state.currentSong == null) return '';
     final file = getAudioFileById(state.currentSong!.id);
     if (file == null) return null;
-    return file.cachCoverPath;
+    return file.cacheCoverPath;
   }
 
-  Future<String> get currentCoverPath async {
+  String get currentCoverPath {
     if (state.currentSong == null) return '';
     final file = getAudioFileById(state.currentSong!.id);
     if (file == null) return '';
-    return await file.meta.readImageCache(file.cacheName);
+    return file.cacheCoverPath;
   }
 }
